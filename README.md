@@ -1,65 +1,42 @@
 # format-python-docstrings README
 
-This is the README for your extension "format-python-docstrings". After writing up a brief description, we recommend including the following sections.
+Simple extension that implements [`docformatter`](https://pypi.org/project/docformatter/) as a native VSCode formatter.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+See https://pypi.org/project/docformatter/ for the full feature list. This extension
+uses that project as a backend with few modifications. To run the formatter after 
+installing, simply open a Python file and run the `Format Document` command. All
+other Python formatters installed will run as well.
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+All relevant flags are implemented as [extension settings](#extension-settings).
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+This extension requires `pip` and/or the `docformatter` module to be installed. Upon activating, the extension will automatically give the option to run
+`pip install --upgrade docformatter` if necessary. If you prefer to install the
+formatter program in another way, you may do so. Just make sure that the
+`docformatter` command is recognized by your terminal.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+All relevant flags from the original `docformatter` program are implemented as
+settings:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* `docstringFormatter.wrapSummariesLength` (`number`, default `79`): Wrap long 
+    summary lines at this length; set to `0` to disable wrapping.
+* `docstringFormatter.wrapDescriptionsLength` (`number`, default `72`): Wrap 
+    descriptions at this length; set to `0` to disable wrapping.
+* `docstringFormatter.preSummaryNewline` (`boolean`, default `false`): Add a 
+    newline before the summary of a multi-line docstring.
+* `docstringFormatter.makeSummaryMultiline` (`boolean`, default `false`): Add a 
+    newline before and after the summary of a one-line docstring.
+* `docstringFormatter.forceWrap` (`boolean`, default `false`): Force 
+    descriptions to be wrapped even if it may result in a mess.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.5.0
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Preview release. May contain bugs; if you encounter any issues or have feature
+requests, please submit an issue on this repository!
