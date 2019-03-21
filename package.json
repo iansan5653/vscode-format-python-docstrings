@@ -1,6 +1,7 @@
 {
     "name": "format-python-docstrings",
     "displayName": "Python Docstring Formatter",
+    "publisher": "iansan5653",
     "description": "Format docstrings in Python using PEP 257 standards.",
     "version": "0.5.0",
     "engines": {
