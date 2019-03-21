@@ -2,10 +2,12 @@ import * as vscode from 'vscode';
 import util = require('util');
 import cp = require('child_process');
 import diff = require('diff');
+import { promises } from 'fs';
 
 const promiseExec = util.promisify(cp.exec);
 
 export function activate(context: vscode.ExtensionContext) {
+    // Register formatter
     const selector: vscode.DocumentSelector = {
         scheme: 'file', language: 'python'
     };
@@ -20,15 +22,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() { }
 
-function alertError(err: cp.ExecException) {
+function alertFormattingError(err: cp.ExecException) {
     if (err.message.includes("is not recognized as an internal or external command")) {
-        vscode.window.showErrorMessage("The Python module \"docformatter\" must be installed to format docstrings. Would you like to install it?");
+        vscode.window.showErrorMessage("The Python module \"docformatter\" must be installed to format docstrings.", "Install Module")
+            .then(value => {
+                if (value === "Install Module") {
+                    installDocformatter();
+                }
+            });
     } else {
-        vscode.window.showErrorMessage("Unknown Error: Could not format docstrings!");
+        vscode.window.showErrorMessage("Unknown Error: Could not format docstrings.");
     }
 }
 
-export function formatFile(path: string): Promise<diff.Hunk[]> {
+function formatFile(path: string): Promise<diff.Hunk[]> {
     const command: string = buildFormatCommand(path);
 
     return new Promise((resolve, reject) =>
@@ -37,13 +44,13 @@ export function formatFile(path: string): Promise<diff.Hunk[]> {
             const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
             resolve(parsed[0].hunks);
         }).catch((err: cp.ExecException) => {
-            alertError(err);
+            alertFormattingError(err);
             reject(err);
         })
     );
 }
 
-export function hunksToEdits(hunks: diff.Hunk[]) {
+function hunksToEdits(hunks: diff.Hunk[]) {
     return hunks.map(hunk => {
         const startPos = new vscode.Position(hunk.newStart - 1, 0);
         const endPos = new vscode.Position(hunk.newStart - 1 + hunk.oldLines - 1,
@@ -68,5 +75,13 @@ function buildFormatCommand(path: string): string {
     const psn: boolean = settings.get('preSummaryNewline') || false;
     const msn: boolean = settings.get('makeSummaryMultiline') || false;
     const fw: boolean = settings.get('forceWrap') || false;
-    return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`
+    return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`;
+}
+
+function installDocformatter(): void {
+    promiseExec("pip install --upgrade docformatter").then(() => {
+        vscode.window.showInformationMessage("Docformatter installed succesfully.");
+    }).catch(() => {
+        vscode.window.showErrorMessage("Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`.");
+    });
 }
