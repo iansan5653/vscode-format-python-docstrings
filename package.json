@@ -17,7 +17,7 @@
     },
     "galleryBanner": {
         "color": "#646464",
-        "theme": "light"
+        "theme": "dark"
     },
     "categories": [
         "Formatters"
