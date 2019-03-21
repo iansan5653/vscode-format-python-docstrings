@@ -1,6 +1,7 @@
-# format-python-docstrings README
+# Python Docstring Formatter Extension
 
-Simple extension that implements [`docformatter`](https://pypi.org/project/docformatter/) as a native VSCode formatter.
+Simple extension that implements [`docformatter`](https://pypi.org/project/docformatter/)
+as a native VSCode formatter. The formatter uses PEP 257 as a guide.
 
 ## Features
 
@@ -13,7 +14,8 @@ All relevant flags are implemented as [extension settings](#extension-settings).
 
 ## Requirements
 
-This extension requires `pip` and/or the `docformatter` module to be installed. Upon activating, the extension will automatically give the option to run
+This extension requires `pip` and/or the `docformatter` module to be installed.
+Upon activating, the extension will automatically give the option to run
 `pip install --upgrade docformatter` if necessary. If you prefer to install the
 formatter program in another way, you may do so. Just make sure that the
 `docformatter` command is recognized by your terminal.
