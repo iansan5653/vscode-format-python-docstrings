@@ -1,38 +1,42 @@
 {
-	"name": "format-python-docstrings",
-	"displayName": "Python Docstring Formatter",
-	"description": "Format docstrings in Python using PEP 257 standards.",
-	"version": "0.5",
-	"engines": {
-		"vscode": "^1.32.0"
-	},
-	"categories": [
-		"Formatters"
-	],
-	"activationEvents": [
-		"onLanguage:python"
-	],
-	"main": "./out/extension.js",
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
-	"devDependencies": {
-		"@types/node": "^10.14.1",
+    "name": "format-python-docstrings",
+    "displayName": "Python Docstring Formatter",
+    "description": "Format docstrings in Python using PEP 257 standards.",
+    "version": "0.5.0",
+    "engines": {
+        "vscode": "^1.32.0"
+    },
+    "categories": [
+        "Formatters"
+    ],
+    "activationEvents": [
+        "onLanguage:python"
+    ],
+    "main": "./out/extension.js",
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "@types/node": "^10.14.1",
         "@types/diff": "^4.0.1",
-		"tslint": "^5.12.1",
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28"
-	},
-	"dependencies": {
-		"child_process": "^1.0.2",
-		"diff": "^4.0.1",
-		"util": "^0.11.1"
+        "tslint": "^5.12.1",
+        "typescript": "^3.3.1",
+        "vscode": "^1.1.28"
+    },
+    "dependencies": {
+        "child_process": "^1.0.2",
+        "diff": "^4.0.1",
+        "util": "^0.11.1"
     },
     "keywords": [
-        "python", "docstrings", "format", "PEP", "docstring"
+        "python",
+        "docstrings",
+        "format",
+        "PEP",
+        "docstring"
     ],
     "preview": true,
     "contributes": {
@@ -43,12 +47,12 @@
                 "docstringFormatter.wrapSummariesLength": {
                     "type": "number",
                     "default": 79,
-                    "description": "Wrap long summary lines at this length; set to 0 to disable wrapping."
+                    "markdownDescription": "Wrap long summary lines at this length; set to `0` to disable wrapping."
                 },
                 "docstringFormatter.wrapDescriptionsLength": {
                     "type": "number",
                     "default": 72,
-                    "description": "Wrap descriptions at this length; set to 0 to disable wrapping."
+                    "markdownDescription": "Wrap descriptions at this length; set to `0` to disable wrapping."
                 },
                 "docstringFormatter.preSummaryNewline": {
                     "type": "boolean",
@@ -61,9 +65,9 @@
                     "description": "Add a newline before and after the summary of a one-line docstring."
                 },
                 "docstringFormatter.forceWrap": {
-                    "type": "number",
+                    "type": "boolean",
                     "default": false,
-                    "description": "force descriptions to be wrapped even if it may result in a mess."
+                    "description": "Force descriptions to be wrapped even if it may result in a mess."
                 }
             }
         }

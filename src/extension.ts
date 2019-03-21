@@ -29,8 +29,10 @@ function alertError(err: cp.ExecException) {
 }
 
 export function formatFile(path: string): Promise<diff.Hunk[]> {
+    const command: string = buildFormatCommand(path);
+
     return new Promise((resolve, reject) =>
-        promiseExec(`docformatter "${path}"`).then(result => {
+        promiseExec(command).then(result => {
             console.log(`Formatted dosctrings in file: "${path}"`);
             const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
             resolve(parsed[0].hunks);
@@ -56,4 +58,15 @@ export function hunksToEdits(hunks: diff.Hunk[]) {
 
         return new vscode.TextEdit(editRange, newText);
     });
+}
+
+function buildFormatCommand(path: string): string {
+    const settings = vscode.workspace.getConfiguration('docstringFormatter');
+    // Abbreviated to keep template string short
+    const wsl: number = settings.get('wrapSummariesLength') || 79;
+    const wdl: number = settings.get('wrapDescriptionsLength') || 72;
+    const psn: boolean = settings.get('preSummaryNewline') || false;
+    const msn: boolean = settings.get('makeSummaryMultiline') || false;
+    const fw: boolean = settings.get('forceWrap') || false;
+    return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`
 }
