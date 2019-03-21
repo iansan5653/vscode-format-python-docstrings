@@ -1,20 +1,18 @@
 {
 	"name": "format-python-docstrings",
-	"displayName": "Format Python Docstrings",
+	"displayName": "Python Docstring Formatter",
 	"description": "Format docstrings in Python using PEP 257 standards.",
-	"version": "0.0.1",
+	"version": "0.5",
 	"engines": {
 		"vscode": "^1.32.0"
 	},
 	"categories": [
-		"Other"
+		"Formatters"
 	],
 	"activationEvents": [
 		"onLanguage:python"
 	],
 	"main": "./out/extension.js",
-	"contributes": {
-	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
@@ -32,5 +30,42 @@
 		"child_process": "^1.0.2",
 		"diff": "^4.0.1",
 		"util": "^0.11.1"
-	}
+    },
+    "keywords": [
+        "python", "docstrings", "format", "PEP", "docstring"
+    ],
+    "preview": true,
+    "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "Python Docstring Formatter configuration",
+            "properties": {
+                "docstringFormatter.wrapSummariesLength": {
+                    "type": "number",
+                    "default": 79,
+                    "description": "Wrap long summary lines at this length; set to 0 to disable wrapping."
+                },
+                "docstringFormatter.wrapDescriptionsLength": {
+                    "type": "number",
+                    "default": 72,
+                    "description": "Wrap descriptions at this length; set to 0 to disable wrapping."
+                },
+                "docstringFormatter.preSummaryNewline": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Add a newline before the summary of a multi-line docstring."
+                },
+                "docstringFormatter.makeSummaryMultiline": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Add a newline before and after the summary of a one-line docstring."
+                },
+                "docstringFormatter.forceWrap": {
+                    "type": "number",
+                    "default": false,
+                    "description": "force descriptions to be wrapped even if it may result in a mess."
+                }
+            }
+        }
+    }
 }
