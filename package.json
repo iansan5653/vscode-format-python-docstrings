@@ -3,10 +3,21 @@
     "displayName": "Python Docstring Formatter",
     "publisher": "iansan5653",
     "description": "Format docstrings in Python using PEP 257 standards.",
-    "version": "0.5.0",
-    "repository": "https://github.com/iansan5653/vscode-format-python-docstrings",
+    "version": "0.5.1",
+    "icon": "icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/iansan5653/vscode-format-python-docstrings"
+    },
+    "issues": {
+        "url": "https://github.com/iansan5653/vscode-format-python-docstrings/issues"
+    },
     "engines": {
         "vscode": "^1.32.0"
+    },
+    "galleryBanner": {
+        "color": "#646464",
+        "theme": "light"
     },
     "categories": [
         "Formatters"
