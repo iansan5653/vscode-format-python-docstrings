@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import util = require('util');
 import cp = require('child_process');
 import diff = require('diff');
-import { promises } from 'fs';
 
 const promiseExec = util.promisify(cp.exec);
 
