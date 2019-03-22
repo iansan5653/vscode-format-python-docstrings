@@ -38,11 +38,5 @@ settings:
 
 ## Release Notes
 
-### 0.5.0
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
-Preview release. May contain bugs; if you encounter any issues or have feature
-requests, please submit an issue on this repository!
-
-### 0.5.1
-
-Adds icon.
