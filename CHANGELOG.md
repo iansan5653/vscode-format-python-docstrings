@@ -24,3 +24,4 @@ requests, please submit an issue on this repository!
 ### Changed
 * Updated readme
 * Fixed text color in marketplace
+* Made settings descriptions easier to understand
