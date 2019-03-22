@@ -3,7 +3,7 @@
     "displayName": "Python Docstring Formatter",
     "publisher": "iansan5653",
     "description": "Format docstrings in Python using PEP 257 standards.",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "icon": "icon.png",
     "repository": {
         "type": "git",
@@ -70,12 +70,12 @@
                 "docstringFormatter.preSummaryNewline": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Add a newline before the summary of a multi-line docstring."
+                    "description": "Add a blank line before the summary of a multi-line docstring."
                 },
                 "docstringFormatter.makeSummaryMultiline": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Add a newline before and after the summary of a one-line docstring."
+                    "description": "Add a blank line before and after the summary of a one-line docstring."
                 },
                 "docstringFormatter.forceWrap": {
                     "type": "boolean",
