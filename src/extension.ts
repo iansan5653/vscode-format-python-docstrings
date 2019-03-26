@@ -4,6 +4,7 @@ import cp = require('child_process');
 import diff = require('diff');
 
 const promiseExec = util.promisify(cp.exec);
+let registration: vscode.Disposable | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
     // Register formatter
@@ -16,10 +17,12 @@ export function activate(context: vscode.ExtensionContext) {
             (document: vscode.TextDocument) => formatFile(document.fileName).then(hunksToEdits)
     };
 
-    vscode.languages.registerDocumentFormattingEditProvider(selector, provider);
+    registration = vscode.languages.registerDocumentFormattingEditProvider(selector, provider);
 }
 
-export function deactivate() { }
+export function deactivate() {
+    if (registration) { registration.dispose(); }
+}
 
 function alertFormattingError(err: cp.ExecException) {
     if (err.message.includes("is not recognized as an internal or external command")) {
