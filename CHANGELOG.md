@@ -25,3 +25,8 @@ requests, please submit an issue on this repository!
 * Updated readme
 * Fixed text color in marketplace
 * Made settings descriptions easier to understand
+
+## 0.6.0
+
+### Changed
+* Dispose of formatter registration upon deactivation
