@@ -30,3 +30,8 @@ requests, please submit an issue on this repository!
 
 ### Changed
 * Dispose of formatter registration upon deactivation
+
+## 0.6.1
+
+### Changed
+* Update dependencies (to resolve vulnerabilities)
