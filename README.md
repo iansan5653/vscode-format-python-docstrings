@@ -7,12 +7,18 @@ formatter. The formatter uses
 
 ## Features
 
-See https://pypi.org/project/docformatter/ for the full feature list. This extension
-uses that project as a backend with few modifications. To run the formatter after 
-installing, simply open a Python file and run the `Format Document` command. All
-other Python formatters installed will run as well.
+See https://pypi.org/project/docformatter/ for the full feature list. This
+extension uses that project as a backend with few modifications.
 
 All relevant flags are implemented as [extension settings](#extension-settings).
+
+## How to Use
+
+If you already have a Python formatting extension installed, you will need to
+pick this one when you want to format a file. In a Python file in VSCode,
+<kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd> to open the command pallette,
+run the command *Format Document With...* and select
+*Python Docstring Formatter*.
 
 ## Requirements
 
