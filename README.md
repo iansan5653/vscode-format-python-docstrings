@@ -1,7 +1,9 @@
 # Python Docstring Formatter Extension
 
-Simple extension that implements [`docformatter`](https://pypi.org/project/docformatter/)
-as a native VSCode formatter. The formatter uses PEP 257 as a guide.
+Simple extension that implements
+[`docformatter`](https://pypi.org/project/docformatter/) as a native VSCode
+formatter. The formatter uses
+[PEP 257](https://www.python.org/dev/peps/pep-0257/) as a guide.
 
 ## Features
 
