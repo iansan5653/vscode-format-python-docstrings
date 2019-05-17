@@ -17,8 +17,11 @@ All relevant flags are implemented as [extension settings](#extension-settings).
 If you already have a Python formatting extension installed, you will need to
 pick this one when you want to format a file. In a Python file in VSCode,
 <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd> to open the command pallette,
-run the command *Format Document With...* and select
-*Python Docstring Formatter*.
+run the command **Format Document With...** and select
+**Python Docstring Formatter**.
+
+*Note*: The **Python Docstring Formatter** option will only appear for saved
+files, not unsaved files, even if the unsaved files are in Python language mode.
 
 ## Requirements
 

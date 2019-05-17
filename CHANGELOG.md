@@ -35,3 +35,9 @@ requests, please submit an issue on this repository!
 
 ### Changed
 * Update dependencies (to resolve vulnerabilities)
+
+## 1.0.0
+
+### Changed
+* Version bumped to 1.0.0 out of preview, absent any bug reports or feature 
+  requests. No additional features are planned at the time.
