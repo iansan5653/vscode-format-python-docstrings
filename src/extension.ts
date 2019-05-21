@@ -4,7 +4,7 @@ import * as cp from 'child_process';
 import * as diff from 'diff';
 
 const promiseExec = util.promisify(cp.exec);
-let registration: vscode.Disposable | undefined;
+export let registration: vscode.Disposable | undefined;
 
 export function activate() {
     // Register formatter
@@ -24,7 +24,7 @@ export function deactivate() {
     if (registration) { registration.dispose(); }
 }
 
-function alertFormattingError(err: cp.ExecException) {
+export function alertFormattingError(err: cp.ExecException) {
     if (err.message.includes("is not recognized as an internal or external command")) {
         vscode.window.showErrorMessage("The Python module \"docformatter\" must be installed to format docstrings.", "Install Module")
             .then(value => {
@@ -37,7 +37,7 @@ function alertFormattingError(err: cp.ExecException) {
     }
 }
 
-function formatFile(path: string): Promise<diff.Hunk[]> {
+export function formatFile(path: string): Promise<diff.Hunk[]> {
     const command: string = buildFormatCommand(path);
 
     return new Promise((resolve, reject) =>
@@ -52,7 +52,7 @@ function formatFile(path: string): Promise<diff.Hunk[]> {
     );
 }
 
-function hunksToEdits(hunks: diff.Hunk[]) {
+export function hunksToEdits(hunks: diff.Hunk[]) {
     return hunks.map(hunk => {
         const startPos = new vscode.Position(hunk.newStart - 1, 0);
         const endPos = new vscode.Position(hunk.newStart - 1 + hunk.oldLines - 1,
@@ -69,7 +69,7 @@ function hunksToEdits(hunks: diff.Hunk[]) {
     });
 }
 
-function buildFormatCommand(path: string): string {
+export function buildFormatCommand(path: string): string {
     const settings = vscode.workspace.getConfiguration('docstringFormatter');
     // Abbreviated to keep template string short
     const wsl: number = settings.get('wrapSummariesLength') || 79;
@@ -80,7 +80,7 @@ function buildFormatCommand(path: string): string {
     return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`;
 }
 
-function installDocformatter(): void {
+export function installDocformatter(): void {
     promiseExec("pip install --upgrade docformatter").then(() => {
         vscode.window.showInformationMessage("Docformatter installed succesfully.");
     }).catch(() => {
