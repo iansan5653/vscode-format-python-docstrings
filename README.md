@@ -5,6 +5,8 @@ Simple extension that implements
 formatter. The formatter uses
 [PEP 257](https://www.python.org/dev/peps/pep-0257/) as a guide.
 
+[![Build Status](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_apis/build/status/iansan5653.vscode-format-python-docstrings?branchName=master)](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_build/latest?definitionId=1&branchName=master)
+
 ## Features
 
 See https://pypi.org/project/docformatter/ for the full feature list. This
