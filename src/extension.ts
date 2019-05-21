@@ -3,7 +3,7 @@ import * as util from 'util';
 import * as cp from 'child_process';
 import * as diff from 'diff';
 
-const promiseExec = util.promisify(cp.exec);
+export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
 export function activate() {
@@ -62,7 +62,7 @@ export function hunksToEdits(hunks: diff.Hunk[]) {
         let newTextLines = hunk.lines
             .filter(line => (line.charAt(0) === ' ' || line.charAt(0) === '+'))
             .map(line => line.substr(1));
-        const lineEndChar: string = (hunk as any).linedelimiters[0];
+        const lineEndChar: string = hunk.linedelimiters[0];
         const newText = newTextLines.join(lineEndChar);
 
         return new vscode.TextEdit(editRange, newText);
@@ -80,10 +80,14 @@ export function buildFormatCommand(path: string): string {
     return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`;
 }
 
-export function installDocformatter(): void {
-    promiseExec("pip install --upgrade docformatter").then(() => {
-        vscode.window.showInformationMessage("Docformatter installed succesfully.");
-    }).catch(() => {
-        vscode.window.showErrorMessage("Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`.");
+export function installDocformatter(): Promise<void> {
+    return new Promise((res, rej) => {
+        promiseExec("pip install --upgrade docformatter").then(() => {
+            vscode.window.showInformationMessage("Docformatter installed succesfully.");
+            res();
+        }).catch(err => {
+            vscode.window.showErrorMessage("Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`.");
+            rej(err);
+        });
     });
 }
