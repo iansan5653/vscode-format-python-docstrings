@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import util = require('util');
-import cp = require('child_process');
-import diff = require('diff');
+import * as util from 'util';
+import * as cp from 'child_process';
+import * as diff from 'diff';
 
 const promiseExec = util.promisify(cp.exec);
 let registration: vscode.Disposable | undefined;
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate() {
     // Register formatter
     const selector: vscode.DocumentSelector = {
         scheme: 'file', language: 'python'

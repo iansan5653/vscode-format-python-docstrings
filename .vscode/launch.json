@@ -10,7 +10,8 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/src/test/testFile.py"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
