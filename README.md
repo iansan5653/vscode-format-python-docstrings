@@ -62,3 +62,12 @@ settings:
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
+## Contributing
+
+Before contributing, you will need to install
+[Node.js (with NPM)](https://nodejs.org/en/) (and Visual Studio Code, of course).
+Clone the repository and install the required dependencies by running
+`npm install` in a terminal in the new directory. All extension logic is in
+`src/extension.ts`. Whenever modifying extension behavior, be sure to update and
+add unit tests in `src/test/extension.test.ts`. To run/test the extension,
+simply use the debugger in VSCode.
