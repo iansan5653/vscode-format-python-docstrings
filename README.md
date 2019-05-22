@@ -22,8 +22,17 @@ pick this one when you want to format a file. In a Python file in VSCode,
 run the command **Format Document With...** and select
 **Python Docstring Formatter**.
 
-*Note*: The **Python Docstring Formatter** option will only appear for saved
-files, not unsaved files, even if the unsaved files are in Python language mode.
+To set the default formatter that is run when you run the **Format Document**,
+on Python files, add the following to your *settings.json*:
+
+```json
+    "[python]": {
+        "editor.defaultFormatter": "iansan5653.format-python-docstrings"
+    }
+```
+
+*Note*: The **Python Docstring Formatter** option will only appear for files
+that have been saved on disk (ie, not *Untitled-#* tabs).
 
 ## Requirements
 
@@ -31,7 +40,7 @@ This extension requires `pip` and/or the `docformatter` module to be installed.
 Upon activating, the extension will automatically give the option to run
 `pip install --upgrade docformatter` if necessary. If you prefer to install the
 formatter program in another way, you may do so. Just make sure that the
-`docformatter` command is recognized by your terminal.
+`docformatter` command is recognized by your terminal (ie, added to your PATH).
 
 ## Extension Settings
 

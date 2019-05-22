@@ -56,18 +56,18 @@ describe('extension.ts', function () {
                 });
         });
 
-        describe('#activate', function () {
+        describe('#activate()', function () {
             // tested by the before hook
             return;
         });
 
         describe('#registration', function () {
-            it('should contain the formatter `Disposable` upon activation', function () {
+            it('should contain the formatter disposable upon activation', function () {
                 assert.ok(ext.registration);
             });
         });
 
-        describe('#alertFormattingError', function () {
+        describe('#alertFormattingError()', function () {
             it('should not throw an error', function () {
                 ext.alertFormattingError({ message: "none" } as ExecException);
             });
@@ -76,7 +76,7 @@ describe('extension.ts', function () {
             it('should install docformatter if the error signifies it\'s not installed');
         });
 
-        describe('#installDocformatter', function () {
+        describe('#installDocformatter()', function () {
             // Uninstall, then reinstall Docformatter
             before('uninstall docformatter if installed', function () {
                 this.timeout('15s');
@@ -96,14 +96,14 @@ describe('extension.ts', function () {
             });
         });
 
-        describe('#formatFile', function () {
+        describe('#formatFile()', function () {
             it('should succesfully resolve with format hunks', function () {
                 this.slow('1s');
                 return assert.doesNotReject(ext.formatFile((document as vscode.TextDocument).fileName));
             });
         });
 
-        describe('#hunksToEdits', function () {
+        describe('#hunksToEdits()', function () {
             it('should handle empty array by returning empty array', function () {
                 assert.strictEqual(ext.hunksToEdits([]).length, 0);
             });
@@ -160,7 +160,7 @@ describe('extension.ts', function () {
             });
         });
 
-        describe('#buildFormatCommand', function () {
+        describe('#buildFormatCommand()', function () {
             it('should contain the passed path', function () {
                 const path = "c:/example-path/document.py";
                 assert.notStrictEqual(ext.buildFormatCommand(path).indexOf(path), -1);
@@ -218,7 +218,7 @@ describe('extension.ts', function () {
                 ext.deactivate();
             });
 
-            describe('#deactivate', function () {
+            describe('#deactivate()', function () {
                 // Tested by the before hook
             });
 
