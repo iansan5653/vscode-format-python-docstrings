@@ -17,6 +17,7 @@ import * as testRunner from 'vscode/lib/testrunner';
 // for more info
 testRunner.configure({
     ui: 'bdd',
+    reporter: 'list',
     useColors: true // colored output from test results
 });
 
