@@ -6,6 +6,10 @@ import * as diff from 'diff';
 export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
+/**
+ * Activate the extension. Run automatically by VSCode based on
+ * the `activationEvents` property in package.json.
+ */
 export function activate() {
     // Register formatter
     const selector: vscode.DocumentSelector = {
@@ -20,10 +24,22 @@ export function activate() {
     registration = vscode.languages.registerDocumentFormattingEditProvider(selector, provider);
 }
 
+/**
+ * Deactivate the extension. Runs automatically upon deactivation or uninstall.
+ */
 export function deactivate() {
     if (registration) { registration.dispose(); }
 }
 
+/**
+ * Handle an error raised by `promiseExec`, which passes an exception object.
+ * 
+ * If the error signifies that Docformatter is not installed, will attempt
+ * to automatically install the tool if the user desires.
+ * 
+ * @param err The error raised by `promiseExec`, which would have been run to
+ * execute the format command.
+ */
 export function alertFormattingError(err: cp.ExecException) {
     if (err.message.includes("is not recognized as an internal or external command")) {
         vscode.window.showErrorMessage("The Python module \"docformatter\" must be installed to format docstrings.", "Install Module")
@@ -37,6 +53,14 @@ export function alertFormattingError(err: cp.ExecException) {
     }
 }
 
+/**
+ * Format a file using Docformatter and return the edit hunks without
+ * modifying the file.
+ * @param path Full path to a file to format.
+ * @returns A promise that resolves to the edit hunks, which can then be
+ * converted to edits and applied to the file. If the promise rejects, will
+ * automatically show an error message to the user.
+ */
 export function formatFile(path: string): Promise<diff.Hunk[]> {
     const command: string = buildFormatCommand(path);
 
@@ -52,6 +76,11 @@ export function formatFile(path: string): Promise<diff.Hunk[]> {
     );
 }
 
+/**
+ * Convert any number of hunks to a matching array of native VSCode edits.
+ * @param hunks Array of hunks to convert to edits.
+ * @returns Array of VSCode text edits, which map directly to the input hunks.
+ */
 export function hunksToEdits(hunks: diff.Hunk[]) {
     return hunks.map(hunk => {
         const startPos = new vscode.Position(hunk.newStart - 1, 0);
@@ -69,6 +98,13 @@ export function hunksToEdits(hunks: diff.Hunk[]) {
     });
 }
 
+/**
+ * Build a text string that can be run as the Docformatter command with flags.
+ * 
+ * Reads the current settings and implements them or falls back to defaults.
+ * @param path Path to the file to be formatted.
+ * @returns Runnable terminal command that will format the specified file.
+ */
 export function buildFormatCommand(path: string): string {
     const settings = vscode.workspace.getConfiguration('docstringFormatter');
     // Abbreviated to keep template string short
@@ -80,6 +116,10 @@ export function buildFormatCommand(path: string): string {
     return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`;
 }
 
+/**
+ * Installs Docformatter on the current system, assuming pip is installed.
+ * @returns Empty promise that resolves upon succesful installation.
+ */
 export function installDocformatter(): Promise<void> {
     return new Promise((res, rej) => {
         promiseExec("pip install --upgrade docformatter").then(() => {
