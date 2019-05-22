@@ -5,6 +5,7 @@
     "description": "Format docstrings in Python using PEP 257 standards.",
     "version": "1.0.0",
     "icon": "icon.png",
+    "license": "SEE LICENSE IN LICENSE.md",
     "repository": {
         "type": "git",
         "url": "https://github.com/iansan5653/vscode-format-python-docstrings"
