@@ -19,20 +19,20 @@ All relevant flags are implemented as [extension settings](#extension-settings).
 If you already have a Python formatting extension installed, you will need to
 pick this one when you want to format a file. In a Python file in VSCode,
 <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd> to open the command pallette,
-run the command **Format Document With...** and select
-**Python Docstring Formatter**.
+run the command *Format Document With...* and select
+*Python Docstring Formatter*.
 
-To set the default formatter that is run when you run the **Format Document**,
-on Python files, add the following to your *settings.json*:
+To set the default formatter that is run when you run the *Format Document*,
+on Python files, add the following to your **settings.json**:
 
 ```json
-    "[python]": {
-        "editor.defaultFormatter": "iansan5653.format-python-docstrings"
-    }
+"[python]": {
+    "editor.defaultFormatter": "iansan5653.format-python-docstrings"
+}
 ```
 
-*Note*: The **Python Docstring Formatter** option will only appear for files
-that have been saved on disk (ie, not *Untitled-#* tabs).
+*Note*: The *Python Docstring Formatter* option will only appear for files
+that have been saved on disk (ie, not **Untitled-#** tabs).
 
 ## Requirements
 
@@ -70,4 +70,4 @@ Clone the repository and install the required dependencies by running
 `npm install` in a terminal in the new directory. All extension logic is in
 `src/extension.ts`. Whenever modifying extension behavior, be sure to update and
 add unit tests in `src/test/extension.test.ts`. To run/test the extension,
-simply use the debugger in VSCode.
+simply use the debugger in VSCode after opening the extension folder.
