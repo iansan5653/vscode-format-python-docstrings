@@ -1,18 +1,17 @@
 import * as path from "path";
-import { runTests } from "vscode-test";
+import {runTests} from "vscode-test";
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const extensionDevelopmentPath = path.resolve(__dirname, "../../");
     const extensionTestsPath = path.resolve(__dirname, "./index");
 
     await runTests({
-      version: 'stable',
+      version: "stable",
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: ["--disable-extensions"]
     });
-
   } catch (err) {
     console.error("Failed to run tests");
     process.exit(1);

@@ -1,56 +1,89 @@
-import * as vscode from 'vscode';
-import * as util from 'util';
-import * as cp from 'child_process';
-import * as diff from 'diff';
+import * as vscode from "vscode";
+import * as util from "util";
+import * as cp from "child_process";
+import * as diff from "diff";
 
 export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
 /**
- * Activate the extension. Run automatically by VSCode based on
- * the `activationEvents` property in package.json.
+ * Build a text string that can be run as the Docformatter command with flags.
+ *
+ * Reads the current settings and implements them or falls back to defaults.
+ * @param path Path to the file to be formatted.
+ * @returns Runnable terminal command that will format the specified file.
  */
-export function activate() {
-    // Register formatter
-    const selector: vscode.DocumentSelector = {
-        scheme: 'file', language: 'python'
-    };
-
-    const provider: vscode.DocumentFormattingEditProvider = {
-        provideDocumentFormattingEdits:
-            (document: vscode.TextDocument) => formatFile(document.fileName).then(hunksToEdits)
-    };
-
-    registration = vscode.languages.registerDocumentFormattingEditProvider(selector, provider);
+export function buildFormatCommand(path: string): string {
+  const settings = vscode.workspace.getConfiguration("docstringFormatter");
+  // Abbreviated to keep template string short
+  const wsl: number = settings.get("wrapSummariesLength") || 79;
+  const wdl: number = settings.get("wrapDescriptionsLength") || 72;
+  const psn: boolean = settings.get("preSummaryNewline") || false;
+  const msn: boolean = settings.get("makeSummaryMultiline") || false;
+  const fw: boolean = settings.get("forceWrap") || false;
+  return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions
+    ${wdl}${psn ? " --blank" : ""}${msn ? " --make-summary-multi-line" : ""}
+    ${fw ? " --force-wrap" : ""}`;
 }
 
 /**
- * Deactivate the extension. Runs automatically upon deactivation or uninstall.
+ * Installs Docformatter on the current system, assuming pip is installed.
+ * @returns Empty promise that resolves upon succesful installation.
  */
-export function deactivate() {
-    if (registration) { registration.dispose(); }
+export function installDocformatter(): Promise<void> {
+  return new Promise(
+    (res, rej): void => {
+      promiseExec("pip install --upgrade docformatter")
+        .then(
+          (): void => {
+            vscode.window.showInformationMessage(
+              "Docformatter installed succesfully."
+            );
+            res();
+          }
+        )
+        .catch(
+          (err): void => {
+            vscode.window.showErrorMessage(
+              "Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`."
+            );
+            rej(err);
+          }
+        );
+    }
+  );
 }
 
 /**
  * Handle an error raised by `promiseExec`, which passes an exception object.
- * 
+ *
  * If the error signifies that Docformatter is not installed, will attempt
  * to automatically install the tool if the user desires.
- * 
+ *
  * @param err The error raised by `promiseExec`, which would have been run to
  * execute the format command.
  */
-export function alertFormattingError(err: cp.ExecException) {
-    if (err.message.includes("is not recognized as an internal or external command")) {
-        vscode.window.showErrorMessage("The Python module \"docformatter\" must be installed to format docstrings.", "Install Module")
-            .then(value => {
-                if (value === "Install Module") {
-                    installDocformatter();
-                }
-            });
-    } else {
-        vscode.window.showErrorMessage("Unknown Error: Could not format docstrings.");
-    }
+export function alertFormattingError(err: FormatException): void {
+  if (
+    err.message.includes("is not recognized as an internal or external command")
+  ) {
+    vscode.window
+      .showErrorMessage(
+        "The Python module 'docformatter' must be installed to format docstrings.",
+        "Install Module"
+      )
+      .then(
+        (value): void => {
+          if (value === "Install Module") {
+            installDocformatter();
+          }
+        }
+      );
+  } else {
+    vscode.window.showErrorMessage(
+      "Unknown Error: Could not format docstrings."
+    );
+  }
 }
 
 /**
@@ -62,18 +95,25 @@ export function alertFormattingError(err: cp.ExecException) {
  * automatically show an error message to the user.
  */
 export function formatFile(path: string): Promise<diff.Hunk[]> {
-    const command: string = buildFormatCommand(path);
+  const command: string = buildFormatCommand(path);
 
-    return new Promise((resolve, reject) =>
-        promiseExec(command).then(result => {
+  return new Promise(
+    (resolve, reject): Promise<void> =>
+      promiseExec(command)
+        .then(
+          (result): void => {
             console.log(`Formatted dosctrings in file: "${path}"`);
             const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
             resolve(parsed[0].hunks);
-        }).catch((err: cp.ExecException) => {
+          }
+        )
+        .catch(
+          (err: cp.ExecException): void => {
             alertFormattingError(err);
             reject(err);
-        })
-    );
+          }
+        )
+  );
 }
 
 /**
@@ -81,53 +121,74 @@ export function formatFile(path: string): Promise<diff.Hunk[]> {
  * @param hunks Array of hunks to convert to edits.
  * @returns Array of VSCode text edits, which map directly to the input hunks.
  */
-export function hunksToEdits(hunks: diff.Hunk[]) {
-    return hunks.map(hunk => {
-        const startPos = new vscode.Position(hunk.newStart - 1, 0);
-        const endPos = new vscode.Position(hunk.newStart - 1 + hunk.oldLines - 1,
-            hunk.lines[hunk.lines.length - 1].length - 1);
-        const editRange = new vscode.Range(startPos, endPos);
+export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
+  return hunks.map(
+    (hunk): vscode.TextEdit => {
+      const startPos = new vscode.Position(hunk.newStart - 1, 0);
+      const endPos = new vscode.Position(
+        hunk.newStart - 1 + hunk.oldLines - 1,
+        hunk.lines[hunk.lines.length - 1].length - 1
+      );
+      const editRange = new vscode.Range(startPos, endPos);
 
-        let newTextLines = hunk.lines
-            .filter(line => (line.charAt(0) === ' ' || line.charAt(0) === '+'))
-            .map(line => line.substr(1));
-        const lineEndChar: string = hunk.linedelimiters[0];
-        const newText = newTextLines.join(lineEndChar);
+      const newTextLines = hunk.lines
+        .filter(
+          (line): boolean => line.charAt(0) === " " || line.charAt(0) === "+"
+        )
+        .map((line): string => line.substr(1));
+      const lineEndChar: string = hunk.linedelimiters[0];
+      const newText = newTextLines.join(lineEndChar);
 
-        return new vscode.TextEdit(editRange, newText);
-    });
+      return new vscode.TextEdit(editRange, newText);
+    }
+  );
 }
 
 /**
- * Build a text string that can be run as the Docformatter command with flags.
- * 
- * Reads the current settings and implements them or falls back to defaults.
- * @param path Path to the file to be formatted.
- * @returns Runnable terminal command that will format the specified file.
+ * Activate the extension. Run automatically by VSCode based on
+ * the `activationEvents` property in package.json.
  */
-export function buildFormatCommand(path: string): string {
-    const settings = vscode.workspace.getConfiguration('docstringFormatter');
-    // Abbreviated to keep template string short
-    const wsl: number = settings.get('wrapSummariesLength') || 79;
-    const wdl: number = settings.get('wrapDescriptionsLength') || 72;
-    const psn: boolean = settings.get('preSummaryNewline') || false;
-    const msn: boolean = settings.get('makeSummaryMultiline') || false;
-    const fw: boolean = settings.get('forceWrap') || false;
-    return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}${psn ? ' --blank' : ''}${msn ? ' --make-summary-multi-line' : ''}${fw ? ' --force-wrap' : ''}`;
+export function activate(): void {
+  // Register formatter
+  const selector: vscode.DocumentSelector = {
+    scheme: "file",
+    language: "python"
+  };
+
+  const provider: vscode.DocumentFormattingEditProvider = {
+    provideDocumentFormattingEdits: (
+      document: vscode.TextDocument
+    ): Promise<vscode.TextEdit[]> => {
+      return formatFile(document.fileName).then(hunksToEdits);
+    }
+  };
+
+  registration = vscode.languages.registerDocumentFormattingEditProvider(
+    selector,
+    provider
+  );
 }
 
 /**
- * Installs Docformatter on the current system, assuming pip is installed.
- * @returns Empty promise that resolves upon succesful installation.
+ * Deactivate the extension. Runs automatically upon deactivation or uninstall.
  */
-export function installDocformatter(): Promise<void> {
-    return new Promise((res, rej) => {
-        promiseExec("pip install --upgrade docformatter").then(() => {
-            vscode.window.showInformationMessage("Docformatter installed succesfully.");
-            res();
-        }).catch(err => {
-            vscode.window.showErrorMessage("Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`.");
-            rej(err);
-        });
-    });
+export function deactivate(): void {
+  if (registration) {
+    registration.dispose();
+  }
+}
+
+/**
+ * Exception thrown when formatting fails.
+ */
+export interface FormatException {
+  message: string;
+}
+
+/**
+ * Sleep for the provided time and then resolve the empty promise.
+ * @param duration Number of milliseconds to sleep.
+ */
+export function sleep(duration: number): Promise<void> {
+  return new Promise((res): NodeJS.Timeout => setTimeout(res, duration));
 }

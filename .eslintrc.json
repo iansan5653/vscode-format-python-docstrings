@@ -19,7 +19,7 @@
     "sourceType": "module"
   },
   "rules": {
-    "indent": ["error", 2, {"SwitchCase": 1}],
+    "indent": "off",
     "@typescript-eslint/indent": "off", // Prettier controls this
     "linebreak-style": "off",
     "@typescript-eslint/linebreak-style": "off",
@@ -37,6 +37,7 @@
     "jsdoc/require-param": 1,
     "jsdoc/require-param-description": 1,
     "jsdoc/require-param-name": 1,
+    "no-invalid-this": "off",
     "comma-dangle": ["error", "never"],
     "quotes": ["error", "double"],
     "no-console": "off",
@@ -53,7 +54,7 @@
         "ignoreComments": false,
         "ignoreTrailingComments": false,
         "ignoreUrls": true,
-        "ignoreStrings": false,
+        "ignoreStrings": true,
         "ignoreTemplateLiterals": false,
         "ignoreRegExpLiterals": false
       }

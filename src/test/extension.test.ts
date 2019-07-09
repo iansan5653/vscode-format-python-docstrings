@@ -1,79 +1,75 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import * as ext from "../extension";
-import {ExecException} from "child_process";
 import {Hunk} from "diff";
 
 const testPythonFile = "/../../src/test/example.py";
 const identifier = "iansan5653.format-python-docstrings";
 
-/**
- * Sleep for the provided time and then resolve the empty promise.
- * @param duration Number of milliseconds to sleep.
- */
-function sleep(duration: number): Promise<void> {
-  return new Promise((res) => setTimeout(res, duration));
-}
-
-describe("extension.ts", function() {
-  context("prior to extension activation", function() {
-    describe("extension", function() {
-      it("should have installed succesfully", function() {
+describe("extension.ts", function(): void {
+  context("prior to extension activation", function(): void {
+    describe("extension", function(): void {
+      it("should have installed succesfully", function(): void {
         assert.ok(vscode.extensions.getExtension(identifier));
       });
 
-      it("should not be activated on startup", function() {
-        let extension = vscode.extensions.getExtension(
+      it("should not be activated on startup", function(): void {
+        const extension = vscode.extensions.getExtension(
           identifier
-        ) as vscode.Extension<any>;
+        ) as vscode.Extension<void>;
         assert.equal(extension.isActive, false);
       });
     });
 
-    describe("#registration", function() {
-      it("should be undefined until activated", function() {
+    describe("#registration", function(): void {
+      it("should be undefined until activated", function(): void {
         assert.strictEqual(ext.registration, undefined);
       });
     });
   });
 
-  context("after extension activation", function() {
+  context("after extension activation", function(): void {
     const extension = vscode.extensions.getExtension(
       identifier
-    ) as vscode.Extension<any>;
+    ) as vscode.Extension<void>;
     let document: vscode.TextDocument;
 
-    before("activate extension by opening Python file", function() {
+    before("activate extension by opening Python file", function(): Thenable<
+      void
+    > {
       this.timeout("3s");
       // Open a text doc, then wait for the the extension to be active.
-      return vscode.workspace
-        .openTextDocument(__dirname + testPythonFile)
-        .then((doc) => {
+      return vscode.workspace.openTextDocument(__dirname + testPythonFile).then(
+        (doc): Promise<void> => {
           document = doc;
-          return new Promise((res) => {
-            setInterval((_) => {
-              if (extension.isActive) {
-                res();
-              }
-            }, 50);
-          });
-        });
+          return new Promise(
+            (res): void => {
+              setInterval((): void => {
+                if (extension.isActive) {
+                  res();
+                }
+              }, 50);
+            }
+          );
+        }
+      );
     });
 
-    describe("#activate()", function() {
+    describe("#activate()", function(): void {
       // tested by the before hook
       return;
     });
 
-    describe("#registration", function() {
-      it("should contain the formatter disposable upon activation", function() {
+    describe("#registration", function(): void {
+      it("should contain the formatter disposable upon activation", function(): void {
         assert.ok(ext.registration);
       });
     });
 
-    describe("#alertFormattingError()", function() {
-      it("should not throw an error", function() {
-        ext.alertFormattingError({message: "none"} as ExecException);
+    describe("#alertFormattingError()", function(): void {
+      it("should not throw an error", function(): void {
+        const exception: ext.FormatException = {message: "none"};
+        ext.alertFormattingError(exception);
       });
 
       // TODO: Test that it installs Docformatter under the right error
@@ -82,33 +78,42 @@ describe("extension.ts", function() {
       );
     });
 
-    describe("#installDocformatter()", function() {
+    describe("#installDocformatter()", function(): void {
       // Uninstall, then reinstall Docformatter
-      before("uninstall docformatter if installed", function() {
+      before("uninstall docformatter if installed", function(): Promise<void> {
         this.timeout("15s");
         this.slow("3s");
-        return new Promise((res) => {
-          // Resolve either way, as a rejection means it wasn't installed anyway
-          ext
-            .promiseExec("pip uninstall docformatter -y")
-            .then((_) => {
-              res();
-            })
-            .catch((_) => {
-              res();
-            });
-        });
+        return new Promise(
+          (res): void => {
+            // Resolve either way, as a rejection means it wasn't installed
+            // anyway
+            ext
+              .promiseExec("pip uninstall docformatter -y")
+              .then(
+                (): void => {
+                  res();
+                }
+              )
+              .catch(
+                (): void => {
+                  res();
+                }
+              );
+          }
+        );
       });
 
-      it("should succesfully install Docformatter", function() {
+      it("should succesfully install Docformatter", function(): Promise<void> {
         this.timeout("15s");
         this.slow("6s");
         return assert.doesNotReject(ext.installDocformatter());
       });
     });
 
-    describe("#formatFile()", function() {
-      it("should succesfully resolve with format hunks", function() {
+    describe("#formatFile()", function(): void {
+      it("should succesfully resolve with format hunks", function(): Promise<
+        void
+      > {
         this.slow("1s");
         return assert.doesNotReject(
           ext.formatFile((document as vscode.TextDocument).fileName)
@@ -116,12 +121,12 @@ describe("extension.ts", function() {
       });
     });
 
-    describe("#hunksToEdits()", function() {
-      it("should handle empty array by returning empty array", function() {
+    describe("#hunksToEdits()", function(): void {
+      it("should handle empty array by returning empty array", function(): void {
         assert.strictEqual(ext.hunksToEdits([]).length, 0);
       });
 
-      it("should maintain hunk range", function() {
+      it("should maintain hunk range", function(): void {
         const hunk: Hunk = {
           oldStart: 1,
           newStart: 2,
@@ -138,7 +143,7 @@ describe("extension.ts", function() {
         assert.strictEqual(vsEdit.range.end.character, 4);
       });
 
-      it("should properly format hunks into edits", function() {
+      it("should properly format hunks into edits", function(): void {
         const hunk: Hunk = {
           oldStart: 1,
           newStart: 2,
@@ -159,7 +164,7 @@ describe("extension.ts", function() {
         assert.strictEqual(vsEdit.newText, "old\nold\nnew\nnew");
       });
 
-      it("should handle multiple hunks", function() {
+      it("should handle multiple hunks", function(): void {
         const hunkA: Hunk = {
           oldStart: 1,
           newStart: 2,
@@ -197,23 +202,23 @@ describe("extension.ts", function() {
       });
     });
 
-    describe("#buildFormatCommand()", function() {
-      it("should contain the passed path", function() {
+    describe("#buildFormatCommand()", function(): void {
+      it("should contain the passed path", function(): void {
         const path = "c:/example-path/document.py";
         assert.notStrictEqual(ext.buildFormatCommand(path).indexOf(path), -1);
       });
 
-      it("should implement the correct defaults", function() {
+      it("should implement the correct defaults", function(): void {
         assert.strictEqual(
           ext.buildFormatCommand("path"),
           "docformatter path --wrap-summaries 79 --wrap-descriptions 72"
         );
       });
 
-      context.skip("with modified settings in test folder", function() {
+      context.skip("with modified settings in test folder", function(): void {
         let settings: vscode.WorkspaceConfiguration;
 
-        before("change the relevant settings", function() {
+        before("change the relevant settings", function(): Thenable<void> {
           // TODO: Why is VSCode not updating the settings in the test
           // environment?
 
@@ -221,21 +226,29 @@ describe("extension.ts", function() {
 
           return settings
             .update("wrapSummariesLength", 85, true)
-            .then((_) => {
-              settings.update("wrapDescriptionsLength", 90, true);
-            })
-            .then((_) => {
-              settings.update("preSummaryNewline", true, true);
-            })
-            .then((_) => {
-              settings.update("makeSummaryMultiline", true, true);
-            })
-            .then((_) => {
-              settings.update("forceWrap", true, true);
-            });
+            .then(
+              (): void => {
+                settings.update("wrapDescriptionsLength", 90, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("preSummaryNewline", true, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("makeSummaryMultiline", true, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("forceWrap", true, true);
+              }
+            );
         });
 
-        it("should use the new settings", function() {
+        it("should use the new settings", function(): void {
           console.log(settings.get("wrapSummariesLength"));
           assert.strictEqual(
             ext.buildFormatCommand("path"),
@@ -243,35 +256,45 @@ describe("extension.ts", function() {
           );
         });
 
-        after("reset the settings back to defaults", function() {
+        after("reset the settings back to defaults", function(): Thenable<
+          void
+        > {
           return settings
             .update("wrapSummariesLength", undefined, true)
-            .then((_) => {
-              settings.update("wrapDescriptionsLength", undefined, true);
-            })
-            .then((_) => {
-              settings.update("preSummaryNewline", undefined, true);
-            })
-            .then((_) => {
-              settings.update("makeSummaryMultiline", undefined, true);
-            })
-            .then((_) => {
-              settings.update("forceWrap", undefined, true);
-            });
+            .then(
+              (): void => {
+                settings.update("wrapDescriptionsLength", undefined, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("preSummaryNewline", undefined, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("makeSummaryMultiline", undefined, true);
+              }
+            )
+            .then(
+              (): void => {
+                settings.update("forceWrap", undefined, true);
+              }
+            );
         });
       });
     });
 
-    context("after extension deactivation", function() {
-      before("deactivate the extension", function() {
+    context("after extension deactivation", function(): void {
+      before("deactivate the extension", function(): void {
         ext.deactivate();
       });
 
-      describe("#deactivate()", function() {
+      describe("#deactivate()", function(): void {
         // Tested by the before hook
       });
 
-      describe("#registration", function() {
+      describe("#registration", function(): void {
         // TODO: determine how to check registration disposal
         it("should be disposed of upon deactivation");
       });
