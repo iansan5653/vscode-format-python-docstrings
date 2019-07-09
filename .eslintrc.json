@@ -1,0 +1,64 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "google",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": ["error", 2, {"SwitchCase": 1}],
+    "@typescript-eslint/indent": "off", // Prettier controls this
+    "linebreak-style": "off",
+    "@typescript-eslint/linebreak-style": "off",
+    "valid-jsdoc": "off",
+    "require-jsdoc": "off",
+    "jsdoc/check-alignment": 1,
+    "jsdoc/check-indentation": 1,
+    "jsdoc/check-param-names": 1,
+    "jsdoc/check-syntax": 1,
+    "jsdoc/check-tag-names": 1,
+    "jsdoc/implements-on-classes": 1,
+    "jsdoc/match-description": 1,
+    "jsdoc/no-types": 1,
+    "jsdoc/require-jsdoc": "off",
+    "jsdoc/require-param": 1,
+    "jsdoc/require-param-description": 1,
+    "jsdoc/require-param-name": 1,
+    "comma-dangle": ["error", "never"],
+    "quotes": ["error", "double"],
+    "no-console": "off",
+    "no-dupe-class-members": "off",
+    "no-param-reassign": "error",
+    "@typescript-eslint/prefer-for-of": "error",
+    "@typescript-eslint/no-parameter-properties": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "max-len": [
+      "error",
+      {
+        "code": 80,
+        "tabWidth": 2,
+        "ignoreComments": false,
+        "ignoreTrailingComments": false,
+        "ignoreUrls": true,
+        "ignoreStrings": false,
+        "ignoreTemplateLiterals": false,
+        "ignoreRegExpLiterals": false
+      }
+    ]
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["jsdoc"]
+}

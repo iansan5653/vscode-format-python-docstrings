@@ -35,19 +35,23 @@
     "devDependencies": {
         "@types/diff": "^4.0.2",
         "@types/glob": "^7.1.1",
-        "@types/mocha": "^5.2.6",
-        "@types/node": "^10.14.1",
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^12.6.1",
+        "@types/vscode": "^1.36.0",
+        "@typescript-eslint/eslint-plugin": "^1.11.0",
+        "@typescript-eslint/parser": "^1.11.0",
+        "eslint": "^6.0.1",
+        "eslint-config-google": "^0.13.0",
+        "eslint-plugin-jsdoc": "^15.3.2",
         "glob": "^7.1.4",
         "mocha": "^6.1.4",
-        "tslint": "^5.12.1",
-        "typescript": "^3.3.1"
+        "typescript": "^3.5.3",
+        "vscode-test": "^1.0.0"
     },
     "dependencies": {
-        "@types/vscode": "^1.36.0",
         "child_process": "^1.0.2",
         "diff": "^4.0.1",
-        "util": "^0.11.1",
-        "vscode-test": "^1.0.0"
+        "util": "^0.12.1"
     },
     "keywords": [
         "python",
