@@ -7,6 +7,23 @@ export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
 /**
+ * Remove whitespace and linebreaks from template literal.
+ * @param strings List of strings from the template.
+ * @param placeholders List of placeholders from the template.
+ */
+export function trimmed(
+  strings: TemplateStringsArray,
+  ...placeholders: unknown[]
+): string {
+  // Build the string as normal, combining all the strings and placeholders:
+  const withSpace = strings.reduce(
+    (result, string, i): string => result + placeholders[i - 1] + string
+  );
+  const withoutSpace = withSpace.replace(/\s\s+/g, " ");
+  return withoutSpace.trim();
+}
+
+/**
  * Build a text string that can be run as the Docformatter command with flags.
  *
  * Reads the current settings and implements them or falls back to defaults.
@@ -21,9 +38,11 @@ export function buildFormatCommand(path: string): string {
   const psn: boolean = settings.get("preSummaryNewline") || false;
   const msn: boolean = settings.get("makeSummaryMultiline") || false;
   const fw: boolean = settings.get("forceWrap") || false;
-  return `docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions
-    ${wdl}${psn ? " --blank" : ""}${msn ? " --make-summary-multi-line" : ""}
-    ${fw ? " --force-wrap" : ""}`;
+  return trimmed`
+    docformatter ${path} --wrap-summaries ${wsl}
+    --wrap-descriptions ${wdl}${psn ? " --blank" : ""}
+    ${msn ? " --make-summary-multi-line" : ""} ${fw ? " --force-wrap" : ""}
+  `;
 }
 
 /**
@@ -44,9 +63,11 @@ export function installDocformatter(): Promise<void> {
         )
         .catch(
           (err): void => {
-            vscode.window.showErrorMessage(
-              "Could not install docformatter automatically. Make sure that pip is installed correctly and try manually installing with `pip install --upgrade docformatter`."
-            );
+            vscode.window.showErrorMessage(trimmed`
+              Could not install docformatter automatically. Make sure that pip
+              is installed correctly and try manually installing with \`pip
+              install --upgrade docformatter\`.
+            `);
             rej(err);
           }
         );
@@ -69,7 +90,8 @@ export function alertFormattingError(err: FormatException): void {
   ) {
     vscode.window
       .showErrorMessage(
-        "The Python module 'docformatter' must be installed to format docstrings.",
+        trimmed`The Python module 'docformatter' must be installed to format
+          docstrings.`,
         "Install Module"
       )
       .then(
