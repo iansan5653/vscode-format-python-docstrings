@@ -30,7 +30,8 @@
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./"
+        "watch": "tsc -watch -p ./",
+        "test": "node out/test/run-tests.js"
     },
     "devDependencies": {
         "@types/diff": "^4.0.2",
