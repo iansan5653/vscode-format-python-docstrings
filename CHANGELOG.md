@@ -4,45 +4,54 @@ All notable changes to the "format-python-docstrings" extension will be
 documented in this file.
 
 ## [Unreleased]
+
 None.
 
 ## 1.0.1
+
 ### Changed
-* Update dependencies
-* Implement new `vscode-test` library
-* Improve code quality and format
+
+- Update dependencies
+- Implement new `vscode-test` library
+- Improve code quality and format
 
 ## 1.0.0
 
 ### Changed
-* Version bumped to 1.0.0 out of preview, absent any bug reports or feature 
+
+- Version bumped to 1.0.0 out of preview, absent any bug reports or feature
   requests. No additional features are planned at the time.
 
 ## 0.6.1
 
 ### Changed
-* Update dependencies (to resolve vulnerabilities)
+
+- Update dependencies (to resolve vulnerabilities)
 
 ## 0.6.0
 
 ### Changed
-* Dispose of formatter registration upon deactivation
+
+- Dispose of formatter registration upon deactivation
 
 ## 0.5.2
 
 ### Added
-* Added new changelog
+
+- Added new changelog
 
 ### Changed
-* Updated readme
-* Fixed text color in marketplace
-* Made settings descriptions easier to understand
+
+- Updated readme
+- Fixed text color in marketplace
+- Made settings descriptions easier to understand
 
 ## 0.5.1
 
 ### Added
-* Added an icon
-* Marketplace metadata to help discovery
+
+- Added an icon
+- Marketplace metadata to help discovery
 
 ## 0.5.0
 
