@@ -124,7 +124,6 @@ export function formatFile(path: string): Promise<diff.Hunk[]> {
       promiseExec(command)
         .then(
           (result): void => {
-            console.log(`Formatted dosctrings in file: "${path}"`);
             const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
             resolve(parsed[0].hunks);
           }

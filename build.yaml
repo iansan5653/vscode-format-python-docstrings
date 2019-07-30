@@ -27,7 +27,12 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run test'
+          customCommand: 'run testWithoutCompile'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'jUnit'
+          testResultsFiles: 'out/test/results.xml'
+        displayName: 'Publish test results'
   - job: macOS
     pool:
       name: Hosted macOS
@@ -56,7 +61,12 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run test'
+          customCommand: 'run testWithoutCompile'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'jUnit'
+          testResultsFiles: 'out/test/results.xml'
+        displayName: 'Publish test results'
   - job: Linux
     pool:
       name: Hosted Ubuntu 1604
@@ -90,6 +100,11 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run test'
+          customCommand: 'run testWithoutCompile'
         env:
           DISPLAY: :10
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'jUnit'
+          testResultsFiles: 'out/test/results.xml'
+        displayName: 'Publish test results'

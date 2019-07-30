@@ -114,6 +114,7 @@ describe("extension.ts", function(): void {
       it("should succesfully resolve with format hunks", function(): Promise<
         void
       > {
+        this.timeout("4s");
         this.slow("1s");
         return assert.doesNotReject(
           ext.formatFile((document as vscode.TextDocument).fileName)

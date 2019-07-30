@@ -6,9 +6,12 @@ export function run(): Promise<void> {
   // Create the mocha test
   const mocha = new Mocha({
     ui: "bdd",
-    reporter: "list"
+    reporter: "mocha-junit-reporter",
+    reporterOptions: {
+      mochaFile: path.resolve(__dirname, "./results.xml"),
+      includePending: true
+    }
   });
-  mocha.useColors(true);
 
   const testsRoot = path.resolve(__dirname, "..");
 
