@@ -30,8 +30,16 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Extension Tests (run-tests.ts)",
-      "program": "${workspaceFolder}/src/test/run-tests.ts",
+      "name": "Extension Tests (run-tests-stable.ts)",
+      "program": "${workspaceFolder}/src/test/run-tests-stable.ts",
+      "preLaunchTask": "npm: watch",
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Extension Tests (run-tests-insiders.ts)",
+      "program": "${workspaceFolder}/src/test/run-tests-insiders.ts",
       "preLaunchTask": "npm: watch",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     }
