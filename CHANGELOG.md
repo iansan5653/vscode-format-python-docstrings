@@ -18,6 +18,7 @@ None.
 - Use `compress-tag` module instead of custom method
 - Improve marketplace listing style
 - Format code and ensure code quality
+- Update dependencies
 
 ## 1.0.1
 
