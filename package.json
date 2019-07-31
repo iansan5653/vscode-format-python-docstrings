@@ -17,8 +17,8 @@
         "vscode": "^1.36.0"
     },
     "galleryBanner": {
-        "color": "#646464",
-        "theme": "dark"
+        "color": "#eeeeee",
+        "theme": "light"
     },
     "categories": [
         "Formatters"
