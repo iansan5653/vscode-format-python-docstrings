@@ -124,8 +124,8 @@ jobs:
         inputs:
           command: custom
           customCommand: 'run testWithoutCompile'
-        env:        DISPLAY: :10
-  
+        env:
+          DISPLAY: :10
         continueOnError: true
       - task: PublishTestResults@2
         inputs:
@@ -257,8 +257,8 @@ jobs:
         inputs:
           command: custom
           customCommand: 'run testWithoutCompileInsiders'
-        env:        DISPLAY: :10
-  
+        env:
+          DISPLAY: :10
         continueOnError: true
       - task: PublishTestResults@2
         inputs:
