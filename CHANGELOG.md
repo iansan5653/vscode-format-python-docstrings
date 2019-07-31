@@ -7,6 +7,18 @@ documented in this file.
 
 None.
 
+## 1.0.2
+
+### Added
+
+- Added button to submit bug report in error messages
+
+### Changed
+
+- Use `compress-tag` module instead of custom method
+- Improve marketplace listing style
+- Format code and ensure code quality
+
 ## 1.0.1
 
 ### Changed
