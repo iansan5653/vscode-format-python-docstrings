@@ -102,9 +102,22 @@ export function alertFormattingError(err: FormatException): void {
         }
       );
   } else {
-    vscode.window.showErrorMessage(
-      "Unknown Error: Could not format docstrings."
-    );
+    const bugReportButton = "Submit Bug Report";
+    vscode.window
+      .showErrorMessage(
+        "Unknown Error: Could not format docstrings.",
+        bugReportButton
+      )
+      .then((value): void => {
+        if (value === bugReportButton) {
+          vscode.commands.executeCommand(
+            "vscode.open",
+            vscode.Uri.parse(
+              "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
+            )
+          );
+        }
+      });
   }
 }
 
@@ -118,7 +131,6 @@ export function alertFormattingError(err: FormatException): void {
  */
 export function formatFile(path: string): Promise<diff.Hunk[]> {
   const command: string = buildFormatCommand(path);
-
   return new Promise(
     (resolve, reject): Promise<void> =>
       promiseExec(command)
