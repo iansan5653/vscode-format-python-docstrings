@@ -37,7 +37,7 @@ jobs:
           customCommand: 'run testWit
         continueOnError: truehoutCompile'
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -80,7 +80,7 @@ jobs:
           customCommand: 'run testWit
         continueOnError: truehoutCompile'
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -130,7 +130,7 @@ jobs:
           DISPLAY: :10
         continueOnError: true
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -173,7 +173,7 @@ jobs:
           customCommand: 'run testWit
         continueOnError: truehoutCompileInsiders'
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -216,7 +216,7 @@ jobs:
           customCommand: 'run testWit
         continueOnError: truehoutCompileInsiders'
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -266,7 +266,7 @@ jobs:
           DISPLAY: :10
         continueOnError: true
       - task: PublishTestResults@2
-        condition: successOrFailure()
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
