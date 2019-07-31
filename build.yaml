@@ -251,7 +251,7 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run testWithoutCompileinsiders'
+          customCommand: 'run testWithoutCompileInsiders'
         env:
           DISPLAY: :10
       - task: PublishTestResults@2
