@@ -2,26 +2,10 @@ import * as vscode from "vscode";
 import * as util from "util";
 import * as cp from "child_process";
 import * as diff from "diff";
+import {c} from "compress-tag";
 
 export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
-
-/**
- * Remove whitespace and linebreaks from template literal.
- * @param strings List of strings from the template.
- * @param placeholders List of placeholders from the template.
- */
-export function trimmed(
-  strings: TemplateStringsArray,
-  ...placeholders: unknown[]
-): string {
-  // Build the string as normal, combining all the strings and placeholders:
-  const withSpace = strings.reduce(
-    (result, string, i): string => result + placeholders[i - 1] + string
-  );
-  const withoutSpace = withSpace.replace(/\s\s+/g, " ");
-  return withoutSpace.trim();
-}
 
 /**
  * Build a text string that can be run as the Docformatter command with flags.
@@ -38,7 +22,7 @@ export function buildFormatCommand(path: string): string {
   const psn: boolean = settings.get("preSummaryNewline") || false;
   const msn: boolean = settings.get("makeSummaryMultiline") || false;
   const fw: boolean = settings.get("forceWrap") || false;
-  return trimmed`
+  return c`
     docformatter ${path} --wrap-summaries ${wsl}
     --wrap-descriptions ${wdl}${psn ? " --blank" : ""}
     ${msn ? " --make-summary-multi-line" : ""} ${fw ? " --force-wrap" : ""}
@@ -63,7 +47,7 @@ export function installDocformatter(): Promise<void> {
         )
         .catch(
           (err): void => {
-            vscode.window.showErrorMessage(trimmed`
+            vscode.window.showErrorMessage(c`
               Could not install docformatter automatically. Make sure that pip
               is installed correctly and try manually installing with \`pip
               install --upgrade docformatter\`.
@@ -90,7 +74,7 @@ export function alertFormattingError(err: FormatException): void {
   ) {
     vscode.window
       .showErrorMessage(
-        trimmed`The Python module 'docformatter' must be installed to format
+        c`The Python module 'docformatter' must be installed to format
           docstrings.`,
         "Install Module"
       )
@@ -108,16 +92,18 @@ export function alertFormattingError(err: FormatException): void {
         "Unknown Error: Could not format docstrings.",
         bugReportButton
       )
-      .then((value): void => {
-        if (value === bugReportButton) {
-          vscode.commands.executeCommand(
-            "vscode.open",
-            vscode.Uri.parse(
-              "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
-            )
-          );
+      .then(
+        (value): void => {
+          if (value === bugReportButton) {
+            vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(
+                "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
+              )
+            );
+          }
         }
-      });
+      );
   }
 }
 
