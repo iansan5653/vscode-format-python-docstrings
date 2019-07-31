@@ -32,7 +32,9 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && npm run testWithoutCompile",
-    "testWithoutCompile": "node out/test/run-tests.js",
+    "testWithoutCompile": "node out/test/run-tests-stable.js",
+    "testInsiders": "npm run compile && npm run testWithoutCompile",
+    "testWithoutCompileInsiders": "node out/test/run-tests-insiders.js",
     "lint": "eslint src/**/*.ts"
   },
   "devDependencies": {
