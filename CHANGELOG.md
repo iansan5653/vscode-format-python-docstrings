@@ -3,7 +3,9 @@
 All notable changes to the "format-python-docstrings" extension will be
 documented in this file.
 
-## 1.0.2 [Unreleased]
+<!-- ## X.X.X [Unreleased] -->
+
+## 1.0.2
 
 ### Added
 

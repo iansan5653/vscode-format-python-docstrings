@@ -6,6 +6,9 @@ formatter. The formatter uses
 [PEP 257](https://www.python.org/dev/peps/pep-0257/) as a guide.
 
 [![Build Status](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_apis/build/status/iansan5653.vscode-format-python-docstrings?branchName=master)](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_build/latest?definitionId=1&branchName=master)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/iansan5653/vscode-format-python-docstrings/1?compact_message)](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_build/latest?definitionId=1&branchName=master)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/iansan5653.format-python-docstrings)](https://marketplace.visualstudio.com/items?itemName=iansan5653.format-python-docstrings)
+
 
 ## Features
 
