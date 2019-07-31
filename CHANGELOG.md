@@ -3,11 +3,7 @@
 All notable changes to the "format-python-docstrings" extension will be
 documented in this file.
 
-## [Unreleased]
-
-None.
-
-## 1.0.2
+## 1.0.2 [Unreleased]
 
 ### Added
 
