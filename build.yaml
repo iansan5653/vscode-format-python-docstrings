@@ -18,6 +18,12 @@ jobs:
         inputs:
           verbose: false
       - task: Npm@1
+        displayName: 'Lint'
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: 'run lint'
+      - task: Npm@1
         displayName: 'Compile sources'
         inputs:
           command: custom
@@ -52,6 +58,12 @@ jobs:
         inputs:
           verbose: false
       - task: Npm@1
+        displayName: 'Lint'
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: 'run lint'
+      - task: Npm@1
         displayName: 'Compile sources'
         inputs:
           command: custom
@@ -85,6 +97,12 @@ jobs:
         displayName: 'Install dependencies'
         inputs:
           verbose: false
+      - task: Npm@1
+        displayName: 'Lint'
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: 'run lint'
       - task: Npm@1
         displayName: 'Compile sources'
         inputs:
