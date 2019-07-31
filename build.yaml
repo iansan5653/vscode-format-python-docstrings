@@ -34,10 +34,9 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run testWit
-        continueOnError: truehoutCompile'
+          customCommand: 'run testWithoutCompile'
+        continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -77,10 +76,9 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run testWit
-        continueOnError: truehoutCompile'
+          customCommand: 'run testWithoutCompile'
+        continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -126,11 +124,10 @@ jobs:
         inputs:
           command: custom
           customCommand: 'run testWithoutCompile'
-        env:
-          DISPLAY: :10
+        env:        DISPLAY: :10
+  
         continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -170,10 +167,9 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run testWit
-        continueOnError: truehoutCompileInsiders'
+          customCommand: 'run testWithoutCompileInsiders'
+        continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -213,10 +209,9 @@ jobs:
         displayName: 'Run tests'
         inputs:
           command: custom
-          customCommand: 'run testWit
-        continueOnError: truehoutCompileInsiders'
+          customCommand: 'run testWithoutCompileInsiders'
+        continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
@@ -262,11 +257,10 @@ jobs:
         inputs:
           command: custom
           customCommand: 'run testWithoutCompileInsiders'
-        env:
-          DISPLAY: :10
+        env:        DISPLAY: :10
+  
         continueOnError: true
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
