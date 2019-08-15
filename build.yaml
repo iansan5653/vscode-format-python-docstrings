@@ -265,3 +265,10 @@ jobs:
           testResultsFormat: 'jUnit'
           testResultsFiles: 'out/test/results.xml'
         displayName: 'Publish test results'
+schedules:
+- cron: 0 0 1 * *
+  displayName: Monthly build (with latest VSCode updates)
+  branches:
+    include:
+      - master
+  always: true
