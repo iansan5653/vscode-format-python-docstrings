@@ -7,7 +7,7 @@ formatter. The formatter uses
 
 [![Build Status](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_apis/build/status/iansan5653.vscode-format-python-docstrings?branchName=master)](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_build/latest?definitionId=1&branchName=master)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/iansan5653/vscode-format-python-docstrings/1?compact_message)](https://dev.azure.com/iansan5653/vscode-format-python-docstrings/_build/latest?definitionId=1&branchName=master)
-[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/iansan5653.format-python-docstrings)](https://marketplace.visualstudio.com/items?itemName=iansan5653.format-python-docstrings)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/iansan5653.format-python-docstrings)](https://marketplace.visualstudio.com/items?itemName=iansan5653.format-python-docstrings) [![Greenkeeper badge](https://badges.greenkeeper.io/iansan5653/vscode-format-python-docstrings.svg)](https://greenkeeper.io/)
 
 
 ## Features
