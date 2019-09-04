@@ -5,6 +5,13 @@ documented in this file.
 
 <!-- ## X.X.X [Unreleased] -->
 
+## 1.1.0
+
+### Fixed
+
+- Fix failure when attempting to format files which contain spaces in their path
+- Update dependencies
+
 ## 1.0.2
 
 ### Added
