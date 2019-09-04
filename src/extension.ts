@@ -23,7 +23,7 @@ export function buildFormatCommand(path: string): string {
   const msn: boolean = settings.get("makeSummaryMultiline") || false;
   const fw: boolean = settings.get("forceWrap") || false;
   return c`
-    docformatter ${path} --wrap-summaries ${wsl} --wrap-descriptions ${wdl}
+    docformatter "${path}" --wrap-summaries ${wsl} --wrap-descriptions ${wdl}
     ${psn ? "--blank" : ""}
     ${msn ? "--make-summary-multi-line" : ""}
     ${fw ? "--force-wrap" : ""}
