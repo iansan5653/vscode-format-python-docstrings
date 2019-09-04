@@ -3,7 +3,13 @@ import * as vscode from "vscode";
 import * as ext from "../extension";
 import {Hunk} from "diff";
 
-const testPythonFile = "/../../src/test/example.py";
+const testPythonFiles: Readonly<Record<string, string>> = {
+  /** The basic test file with no quirks. */
+  base: "/../../src/test/example.py",
+  /** A test file where the path contains spaces. */
+  spacesInName: "/../../src/test/example with spaces in names.py"
+};
+/** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
 
 describe("extension.ts", function(): void {
@@ -32,32 +38,33 @@ describe("extension.ts", function(): void {
     const extension = vscode.extensions.getExtension(
       identifier
     ) as vscode.Extension<void>;
-    let document: vscode.TextDocument;
+    const documents: Record<string, vscode.TextDocument | null> = {
+      base: null,
+      spacesInName: null
+    };
 
-    before("activate extension by opening Python file", function(): Thenable<
-      void
-    > {
-      this.timeout("3s");
+    before("open test files", async function(): Promise<void> {
       // Open a text doc, then wait for the the extension to be active.
-      return vscode.workspace.openTextDocument(__dirname + testPythonFile).then(
-        (doc): Promise<void> => {
-          document = doc;
-          return new Promise(
-            (res): void => {
-              setInterval((): void => {
-                if (extension.isActive) {
-                  res();
-                }
-              }, 50);
-            }
-          );
-        }
-      );
+      const documentsList = await Promise.all([
+        vscode.workspace.openTextDocument(__dirname + testPythonFiles.base),
+        vscode.workspace.openTextDocument(
+          __dirname + testPythonFiles.spacesInName
+        )
+      ]);
+      documents.base = documentsList[0];
+      documents.spacesInName = documentsList[1];
     });
 
-    describe("#activate()", function(): void {
-      // tested by the before hook
-      return;
+    describe("#activate()", function(): Promise<void> {
+      // Waits until the extension is active, but will eventually time out if
+      // not
+      return new Promise((res): void => {
+        setInterval((): void => {
+          if (extension.isActive) {
+            res();
+          }
+        }, 50);
+      });
     });
 
     describe("#registration", function(): void {
@@ -83,24 +90,18 @@ describe("extension.ts", function(): void {
       before("uninstall docformatter if installed", function(): Promise<void> {
         this.timeout("15s");
         this.slow("3s");
-        return new Promise(
-          (res): void => {
-            // Resolve either way, as a rejection means it wasn't installed
-            // anyway
-            ext
-              .promiseExec("pip uninstall docformatter -y")
-              .then(
-                (): void => {
-                  res();
-                }
-              )
-              .catch(
-                (): void => {
-                  res();
-                }
-              );
-          }
-        );
+        return new Promise((res): void => {
+          // Resolve either way, as a rejection means it wasn't installed
+          // anyway
+          ext
+            .promiseExec("pip uninstall docformatter -y")
+            .then((): void => {
+              res();
+            })
+            .catch((): void => {
+              res();
+            });
+        });
       });
 
       it("should succesfully install Docformatter", function(): Promise<void> {
@@ -117,7 +118,19 @@ describe("extension.ts", function(): void {
         this.timeout("4s");
         this.slow("1s");
         return assert.doesNotReject(
-          ext.formatFile((document as vscode.TextDocument).fileName)
+          ext.formatFile((documents.base as vscode.TextDocument).fileName)
+        );
+      });
+
+      it("should succesfully resolve if there are spaces in the file path", function(): Promise<
+        void
+      > {
+        this.timeout("4s");
+        this.slow("1s");
+        return assert.doesNotReject(
+          ext.formatFile(
+            (documents.spacesInName as vscode.TextDocument).fileName
+          )
         );
       });
     });
@@ -227,26 +240,18 @@ describe("extension.ts", function(): void {
 
           return settings
             .update("wrapSummariesLength", 85, true)
-            .then(
-              (): void => {
-                settings.update("wrapDescriptionsLength", 90, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("preSummaryNewline", true, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("makeSummaryMultiline", true, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("forceWrap", true, true);
-              }
-            );
+            .then((): void => {
+              settings.update("wrapDescriptionsLength", 90, true);
+            })
+            .then((): void => {
+              settings.update("preSummaryNewline", true, true);
+            })
+            .then((): void => {
+              settings.update("makeSummaryMultiline", true, true);
+            })
+            .then((): void => {
+              settings.update("forceWrap", true, true);
+            });
         });
 
         it("should use the new settings", function(): void {
@@ -262,26 +267,18 @@ describe("extension.ts", function(): void {
         > {
           return settings
             .update("wrapSummariesLength", undefined, true)
-            .then(
-              (): void => {
-                settings.update("wrapDescriptionsLength", undefined, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("preSummaryNewline", undefined, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("makeSummaryMultiline", undefined, true);
-              }
-            )
-            .then(
-              (): void => {
-                settings.update("forceWrap", undefined, true);
-              }
-            );
+            .then((): void => {
+              settings.update("wrapDescriptionsLength", undefined, true);
+            })
+            .then((): void => {
+              settings.update("preSummaryNewline", undefined, true);
+            })
+            .then((): void => {
+              settings.update("makeSummaryMultiline", undefined, true);
+            })
+            .then((): void => {
+              settings.update("forceWrap", undefined, true);
+            });
         });
       });
     });
