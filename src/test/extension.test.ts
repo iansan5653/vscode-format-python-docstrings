@@ -55,15 +55,17 @@ describe("extension.ts", function(): void {
       documents.spacesInName = documentsList[1];
     });
 
-    describe("#activate()", function(): Promise<void> {
+    describe("#activate()", function(): void {
       // Waits until the extension is active, but will eventually time out if
       // not
-      return new Promise((res): void => {
-        setInterval((): void => {
-          if (extension.isActive) {
-            res();
-          }
-        }, 50);
+      it("should successfully activate the extension on file opening", function(): Promise<void> {
+        return new Promise((res): void => {
+          setInterval((): void => {
+            if (extension.isActive) {
+              res();
+            }
+          }, 50);
+        });
       });
     });
 
