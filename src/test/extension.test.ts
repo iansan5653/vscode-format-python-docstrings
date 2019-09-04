@@ -7,7 +7,7 @@ const testPythonFiles: Readonly<Record<string, string>> = {
   /** The basic test file with no quirks. */
   base: "/../../src/test/example.py",
   /** A test file where the path contains spaces. */
-  spacesInName: "/../../src/test/example with spaces in names.py"
+  spacesInName: "/../../src/test/example with spaces in name.py"
 };
 /** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
