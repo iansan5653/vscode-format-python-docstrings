@@ -227,7 +227,7 @@ describe("extension.ts", function(): void {
       it("should implement the correct defaults", function(): void {
         assert.strictEqual(
           ext.buildFormatCommand("path"),
-          "docformatter path --wrap-summaries 79 --wrap-descriptions 72"
+          "docformatter \"path\" --wrap-summaries 79 --wrap-descriptions 72"
         );
       });
 
