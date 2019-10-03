@@ -27,11 +27,14 @@ run the command *Format Document With...* and select
 *Python Docstring Formatter*.
 
 To set the default formatter that is run when you run the *Format Document*,
-on Python files, add the following to your **settings.json**:
+on Python files, add the following to your **settings.json** (`...` being your other settings):
 
 ```json
-"[python]": {
-    "editor.defaultFormatter": "iansan5653.format-python-docstrings"
+{
+    ...,
+    "[python]": {
+        "editor.defaultFormatter": "iansan5653.format-python-docstrings"
+    }
 }
 ```
 
