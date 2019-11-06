@@ -27,7 +27,9 @@ export function buildFormatCommand(path: string): string {
     ${psn ? "--blank" : ""}
     ${msn ? "--make-summary-multi-line" : ""}
     ${fw ? "--force-wrap" : ""}
-  `.trim().replace(/\s+/, " "); // Remove extra whitespace (helps with tests)
+  `
+    .trim()
+    .replace(/\s+/, " "); // Remove extra whitespace (helps with tests)
 }
 
 /**
