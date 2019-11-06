@@ -39,39 +39,27 @@ export function buildFormatCommand(path: string): string {
     ${psn ? "--blank" : ""}
     ${msn ? "--make-summary-multi-line" : ""}
     ${fw ? "--force-wrap" : ""}
-  `.trim().replace(/\s+/, " "); // Remove extra whitespace (helps with tests)
+  `
+    .trim()
+    .replace(/\s+/, " "); // Remove extra whitespace (helps with tests)
 }
 
 /**
  * Installs Docformatter on the current system, assuming pip is installed.
  * @returns Empty promise that resolves upon succesful installation.
  */
-export function installDocformatter(): Promise<void> {
+export async function installDocformatter(): Promise<void> {
   const python = getPython();
-  return new Promise(
-    (res, rej): void => {
-      promiseExec(`${python} -m pip install --upgrade docformatter`)
-        .then(
-          (): void => {
-            vscode.window.showInformationMessage(
-              "Docformatter installed succesfully."
-            );
-            res();
-          }
-        )
-        .catch(
-          (err): void => {
-            vscode.window.showErrorMessage(c`
-              Could not install docformatter automatically. Make sure that pip
-              is installed and that your "python.pythonPath" setting is
-              configured correctly or your Python path is set in your system
-              variables.
-            `);
-            rej(err);
-          }
-        );
-    }
-  );
+  try {
+    await promiseExec(`${python} -m pip install --upgrade docformatter`);
+  } catch (err) {
+    vscode.window.showErrorMessage(c`
+      Could not install docformatter automatically. Make sure that pip
+      is installed correctly and try manually installing with \`pip
+      install --upgrade docformatter\`.
+    `);
+    throw err;
+  }
 }
 
 /**
@@ -83,42 +71,36 @@ export function installDocformatter(): Promise<void> {
  * @param err The error raised by `promiseExec`, which would have been run to
  * execute the format command.
  */
-export function alertFormattingError(err: FormatException): void {
+export async function alertFormattingError(
+  err: FormatException
+): Promise<void> {
   if (
     err.message.includes("is not recognized as an internal or external command")
   ) {
-    vscode.window
-      .showErrorMessage(
-        c`Python and the Python module 'docformatter' must be installed to
-          format docstrings.`,
-        "Install Module"
-      )
-      .then(
-        (value): void => {
-          if (value === "Install Module") {
-            installDocformatter();
-          }
-        }
-      );
+    const installButton = "Install Module";
+    const response = await vscode.window.showErrorMessage(
+      c`The Python module 'docformatter' must be installed to format
+          docstrings.`,
+      installButton
+    );
+    if (response === installButton) {
+      installDocformatter();
+    }
   } else {
     const bugReportButton = "Submit Bug Report";
-    vscode.window
-      .showErrorMessage(
-        "Unknown Error: Could not format docstrings.",
-        bugReportButton
-      )
-      .then(
-        (value): void => {
-          if (value === bugReportButton) {
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
-              )
-            );
-          }
-        }
+    const response = await vscode.window.showErrorMessage(
+      c`Unknown Error: Could not format docstrings. Full error:\n\n
+        ${err.message}`,
+      bugReportButton
+    );
+    if (response === bugReportButton) {
+      vscode.commands.executeCommand(
+        "vscode.open",
+        vscode.Uri.parse(
+          "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
+        )
       );
+    }
   }
 }
 
@@ -130,24 +112,16 @@ export function alertFormattingError(err: FormatException): void {
  * converted to edits and applied to the file. If the promise rejects, will
  * automatically show an error message to the user.
  */
-export function formatFile(path: string): Promise<diff.Hunk[]> {
+export async function formatFile(path: string): Promise<diff.Hunk[]> {
   const command: string = buildFormatCommand(path);
-  return new Promise(
-    (resolve, reject): Promise<void> =>
-      promiseExec(command)
-        .then(
-          (result): void => {
-            const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
-            resolve(parsed[0].hunks);
-          }
-        )
-        .catch(
-          (err: cp.ExecException): void => {
-            alertFormattingError(err);
-            reject(err);
-          }
-        )
-  );
+  try {
+    const result = await promiseExec(command);
+    const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
+    return parsed[0].hunks;
+  } catch (err) {
+    alertFormattingError(err);
+    throw err;
+  }
 }
 
 /**
