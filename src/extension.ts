@@ -99,20 +99,16 @@ export async function alertFormattingError(
  * converted to edits and applied to the file. If the promise rejects, will
  * automatically show an error message to the user.
  */
-export function formatFile(path: string): Promise<diff.Hunk[]> {
+export async function formatFile(path: string): Promise<diff.Hunk[]> {
   const command: string = buildFormatCommand(path);
-  return new Promise(
-    (resolve, reject): Promise<void> =>
-      promiseExec(command)
-        .then((result): void => {
-          const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
-          resolve(parsed[0].hunks);
-        })
-        .catch((err: cp.ExecException): void => {
-          alertFormattingError(err);
-          reject(err);
-        })
-  );
+  try {
+    const result = await promiseExec(command);
+    const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
+    return parsed[0].hunks;
+  } catch (err) {
+    alertFormattingError(err);
+    throw err;
+  }
 }
 
 /**
