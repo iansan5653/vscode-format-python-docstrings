@@ -219,9 +219,10 @@ describe("extension.ts", function(): void {
     });
 
     describe("#buildFormatCommand()", function(): void {
-      it("should contain the passed path", function(): void {
+      it("should contain the passed path", async function(): Promise<void> {
         const path = "c:/example-path/document.py";
-        assert.notStrictEqual(ext.buildFormatCommand(path).indexOf(path), -1);
+        const command = await ext.buildFormatCommand(path);
+        assert.notStrictEqual(command.indexOf(path), -1);
       });
 
       it("should implement the correct defaults", function(): void {
