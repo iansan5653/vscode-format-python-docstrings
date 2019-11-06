@@ -17,11 +17,11 @@ export let registration: vscode.Disposable | undefined;
 export function buildFormatCommand(path: string): string {
   const settings = vscode.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
-  const wsl: number = settings.get("wrapSummariesLength") || 79;
-  const wdl: number = settings.get("wrapDescriptionsLength") || 72;
-  const psn: boolean = settings.get("preSummaryNewline") || false;
-  const msn: boolean = settings.get("makeSummaryMultiline") || false;
-  const fw: boolean = settings.get("forceWrap") || false;
+  const wsl = settings.get<number>("wrapSummariesLength") || 79;
+  const wdl = settings.get<number>("wrapDescriptionsLength") || 72;
+  const psn = settings.get<boolean>("preSummaryNewline") || false;
+  const msn = settings.get<boolean>("makeSummaryMultiline") || false;
+  const fw = settings.get<boolean>("forceWrap") || false;
   return c`
     docformatter "${path}" --wrap-summaries ${wsl} --wrap-descriptions ${wdl}
     ${psn ? "--blank" : ""}
