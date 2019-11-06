@@ -11,7 +11,7 @@ export let registration: vscode.Disposable | undefined;
  * Get the path to the most locally set Python. Should look in settings before
  * looking in PATH.
  */
-export async function getPython(): Promise<string> {
+export function getPython(): string {
   const pySettings = vscode.workspace.getConfiguration("python");
   const pythonPath = `"${pySettings.get("pythonPath") || "python"}"`;
   return pythonPath;
