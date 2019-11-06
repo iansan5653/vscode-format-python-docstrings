@@ -8,6 +8,16 @@ export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
 /**
+ * Get the path to the most locally set Python. Should look in settings before
+ * looking in PATH.
+ */
+export async function getPython(): Promise<string> {
+  const pySettings = vscode.workspace.getConfiguration("python");
+  const pythonPath = `"${pySettings.get("pythonPath") || "python"}"`;
+  return pythonPath;
+}
+
+/**
  * Build a text string that can be run as the Docformatter command with flags.
  *
  * Reads the current settings and implements them or falls back to defaults.
@@ -15,6 +25,7 @@ export let registration: vscode.Disposable | undefined;
  * @returns Runnable terminal command that will format the specified file.
  */
 export function buildFormatCommand(path: string): string {
+  const python = getPython();
   const settings = vscode.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
   const wsl: number = settings.get("wrapSummariesLength") || 79;
@@ -23,6 +34,7 @@ export function buildFormatCommand(path: string): string {
   const msn: boolean = settings.get("makeSummaryMultiline") || false;
   const fw: boolean = settings.get("forceWrap") || false;
   return c`
+    ${python} -m
     docformatter "${path}" --wrap-summaries ${wsl} --wrap-descriptions ${wdl}
     ${psn ? "--blank" : ""}
     ${msn ? "--make-summary-multi-line" : ""}
@@ -35,9 +47,10 @@ export function buildFormatCommand(path: string): string {
  * @returns Empty promise that resolves upon succesful installation.
  */
 export function installDocformatter(): Promise<void> {
+  const python = getPython();
   return new Promise(
     (res, rej): void => {
-      promiseExec("pip install --upgrade docformatter")
+      promiseExec(`${python} -m pip install --upgrade docformatter`)
         .then(
           (): void => {
             vscode.window.showInformationMessage(
@@ -50,8 +63,9 @@ export function installDocformatter(): Promise<void> {
           (err): void => {
             vscode.window.showErrorMessage(c`
               Could not install docformatter automatically. Make sure that pip
-              is installed correctly and try manually installing with \`pip
-              install --upgrade docformatter\`.
+              is installed and that your "python.pythonPath" setting is
+              configured correctly or your Python path is set in your system
+              variables.
             `);
             rej(err);
           }
@@ -75,8 +89,8 @@ export function alertFormattingError(err: FormatException): void {
   ) {
     vscode.window
       .showErrorMessage(
-        c`The Python module 'docformatter' must be installed to format
-          docstrings.`,
+        c`Python and the Python module 'docformatter' must be installed to
+          format docstrings.`,
         "Install Module"
       )
       .then(
