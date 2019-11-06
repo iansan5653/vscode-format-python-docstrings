@@ -8,13 +8,40 @@ export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
 /**
- * Get the path to the most locally set Python. Should look in settings before
- * looking in PATH.
+ * Get the path to the most locally set Python. If Python cannot be found, this
+ * will reject. Otherwise, will resolve with the python command.
+ * @returns A command which can be called to invoke Python in the terminal.
  */
-export function getPython(): string {
-  const pySettings = vscode.workspace.getConfiguration("python");
-  const pythonPath = `"${pySettings.get("pythonPath") || "python"}"`;
-  return pythonPath;
+export async function getPython(): Promise<string> {
+  const setPath = vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+  if (setPath !== undefined) {
+    try {
+      await promiseExec(`"${setPath}" --version`);
+      return setPath;
+    } catch (err) {
+      vscode.window.showErrorMessage(c`
+        The Python path set in the "python.pythonPath" setting is invalid. Check
+        the value or clear the setting to use the global Python installation.
+      `);
+      throw err;
+    }
+  }
+  try {
+    await promiseExec("python --version");
+    return "python";
+  } catch {
+    try {
+      await promiseExec("py --version");
+      return "py";
+    } catch (err) {
+      vscode.window.showErrorMessage(c`
+        Python is either not installed or not properly configured. Check that
+        the Python location is set in VSCode or provided in the system
+        environment variables.
+      `);
+      throw err;
+    }
+  }
 }
 
 /**
@@ -24,8 +51,8 @@ export function getPython(): string {
  * @param path Path to the file to be formatted.
  * @returns Runnable terminal command that will format the specified file.
  */
-export function buildFormatCommand(path: string): string {
-  const python = getPython();
+export async function buildFormatCommand(path: string): Promise<string> {
+  const python = await getPython();
   const settings = vscode.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
   const wsl: number = settings.get("wrapSummariesLength") || 79;
@@ -49,7 +76,7 @@ export function buildFormatCommand(path: string): string {
  * @returns Empty promise that resolves upon succesful installation.
  */
 export async function installDocformatter(): Promise<void> {
-  const python = getPython();
+  const python = await getPython();
   try {
     await promiseExec(`${python} -m pip install --upgrade docformatter`);
   } catch (err) {
@@ -113,7 +140,7 @@ export async function alertFormattingError(
  * automatically show an error message to the user.
  */
 export async function formatFile(path: string): Promise<diff.Hunk[]> {
-  const command: string = buildFormatCommand(path);
+  const command: string = await buildFormatCommand(path);
   try {
     const result = await promiseExec(command);
     const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
