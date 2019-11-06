@@ -36,30 +36,17 @@ export function buildFormatCommand(path: string): string {
  * Installs Docformatter on the current system, assuming pip is installed.
  * @returns Empty promise that resolves upon succesful installation.
  */
-export function installDocformatter(): Promise<void> {
-  return new Promise(
-    (res, rej): void => {
-      promiseExec("pip install --upgrade docformatter")
-        .then(
-          (): void => {
-            vscode.window.showInformationMessage(
-              "Docformatter installed succesfully."
-            );
-            res();
-          }
-        )
-        .catch(
-          (err): void => {
-            vscode.window.showErrorMessage(c`
-              Could not install docformatter automatically. Make sure that pip
-              is installed correctly and try manually installing with \`pip
-              install --upgrade docformatter\`.
-            `);
-            rej(err);
-          }
-        );
-    }
-  );
+export async function installDocformatter(): Promise<void> {
+  try {
+    await promiseExec("pip install --upgrade docformatter");
+  } catch (err) {
+    vscode.window.showErrorMessage(c`
+      Could not install docformatter automatically. Make sure that pip
+      is installed correctly and try manually installing with \`pip
+      install --upgrade docformatter\`.
+    `);
+    throw err;
+  }
 }
 
 /**
