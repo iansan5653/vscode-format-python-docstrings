@@ -58,42 +58,36 @@ export async function installDocformatter(): Promise<void> {
  * @param err The error raised by `promiseExec`, which would have been run to
  * execute the format command.
  */
-export function alertFormattingError(err: FormatException): void {
+export async function alertFormattingError(
+  err: FormatException
+): Promise<void> {
   if (
     err.message.includes("is not recognized as an internal or external command")
   ) {
-    vscode.window
-      .showErrorMessage(
-        c`The Python module 'docformatter' must be installed to format
+    const installButton = "Install Module";
+    const response = await vscode.window.showErrorMessage(
+      c`The Python module 'docformatter' must be installed to format
           docstrings.`,
-        "Install Module"
-      )
-      .then(
-        (value): void => {
-          if (value === "Install Module") {
-            installDocformatter();
-          }
-        }
-      );
+      installButton
+    );
+    if (response === installButton) {
+      installDocformatter();
+    }
   } else {
     const bugReportButton = "Submit Bug Report";
-    vscode.window
-      .showErrorMessage(
-        "Unknown Error: Could not format docstrings.",
-        bugReportButton
-      )
-      .then(
-        (value): void => {
-          if (value === bugReportButton) {
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
-              )
-            );
-          }
-        }
+    const response = await vscode.window.showErrorMessage(
+      c`Unknown Error: Could not format docstrings. Full error:\n\n
+        ${err.message}`,
+      bugReportButton
+    );
+    if (response === bugReportButton) {
+      vscode.commands.executeCommand(
+        "vscode.open",
+        vscode.Uri.parse(
+          "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
+        )
       );
+    }
   }
 }
 
@@ -110,18 +104,14 @@ export function formatFile(path: string): Promise<diff.Hunk[]> {
   return new Promise(
     (resolve, reject): Promise<void> =>
       promiseExec(command)
-        .then(
-          (result): void => {
-            const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
-            resolve(parsed[0].hunks);
-          }
-        )
-        .catch(
-          (err: cp.ExecException): void => {
-            alertFormattingError(err);
-            reject(err);
-          }
-        )
+        .then((result): void => {
+          const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
+          resolve(parsed[0].hunks);
+        })
+        .catch((err: cp.ExecException): void => {
+          alertFormattingError(err);
+          reject(err);
+        })
   );
 }
 
