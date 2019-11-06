@@ -5,6 +5,13 @@ documented in this file.
 
 <!-- ## X.X.X [Unreleased] -->
 
+## 1.2.0
+
+### Added
+
+- Respect the `python.pythonPath` setting
+- Provide more helpful error messages
+
 ## 1.1.0
 
 ### Fixed
