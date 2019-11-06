@@ -35,7 +35,8 @@
     "testWithoutCompile": "node out/test/run-tests-stable.js",
     "testInsiders": "npm run compile && npm run testWithoutCompile",
     "testWithoutCompileInsiders": "node out/test/run-tests-insiders.js",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/diff": "^4.0.2",
@@ -52,6 +53,7 @@
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "^1.23.1",
     "typescript": "^3.5.3",
+    "vsce": "^1.69.0",
     "vscode-test": "^1.0.2"
   },
   "dependencies": {
