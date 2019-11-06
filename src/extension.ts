@@ -82,8 +82,8 @@ export async function installDocformatter(): Promise<void> {
   } catch (err) {
     vscode.window.showErrorMessage(c`
       Could not install docformatter automatically. Make sure that pip
-      is installed correctly and try manually installing with \`pip
-      install --upgrade docformatter\`.
+      is installed correctly and try manually installing with 'pip
+      install --upgrade docformatter. \n\n Full error: ${err}'.
     `);
     throw err;
   }
@@ -102,7 +102,7 @@ export async function alertFormattingError(
   err: FormatException
 ): Promise<void> {
   if (
-    err.message.includes("is not recognized as an internal or external command")
+    err.message.includes("No module named docformatter")
   ) {
     const installButton = "Install Module";
     const response = await vscode.window.showErrorMessage(
