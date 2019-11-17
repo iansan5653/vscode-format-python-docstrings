@@ -58,7 +58,9 @@ describe("extension.ts", function(): void {
     describe("#activate()", function(): void {
       // Waits until the extension is active, but will eventually time out if
       // not
-      it("should successfully activate the extension on file opening", function(): Promise<void> {
+      it("should successfully activate the extension on file opening", function(): Promise<
+        void
+      > {
         return new Promise((res): void => {
           setInterval((): void => {
             if (extension.isActive) {
@@ -225,10 +227,17 @@ describe("extension.ts", function(): void {
         assert.notStrictEqual(command.indexOf(path), -1);
       });
 
-      it("should implement the correct defaults", function(): void {
-        assert.strictEqual(
-          ext.buildFormatCommand("path"),
-          "docformatter \"path\" --wrap-summaries 79 --wrap-descriptions 72"
+      it("should implement the correct defaults", async function(): Promise<
+        void
+      > {
+        const command = await ext.buildFormatCommand("path");
+        // Asserting that the string contains allows for `python -m *` or `py *`
+        assert.notStrictEqual(
+          command.indexOf(
+            // eslint-disable-next-line quotes
+            'docformatter "path" --wrap-summaries 79 --wrap-descriptions 72'
+          ),
+          -1
         );
       });
 
@@ -257,10 +266,10 @@ describe("extension.ts", function(): void {
             });
         });
 
-        it("should use the new settings", function(): void {
-          console.log(settings.get("wrapSummariesLength"));
+        it("should use the new settings", async function(): Promise<void> {
+          const command = await ext.buildFormatCommand("path");
           assert.strictEqual(
-            ext.buildFormatCommand("path"),
+            command,
             "docformatter path --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap"
           );
         });
