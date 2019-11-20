@@ -265,8 +265,6 @@ describe("extension.ts", function(): void {
           const command = await ext.buildFormatCommand("path");
           const expectedCommandWithoutPy =
             'docformatter "path" --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap';
-          console.log(command);
-          console.log(expectedCommandWithoutPy);
           assert(command.endsWith(expectedCommandWithoutPy));
         });
 
