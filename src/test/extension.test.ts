@@ -292,6 +292,32 @@ describe("extension.ts", function(): void {
       });
     });
 
+    describe("#getPython()", function(): void {
+      it("should return a runnable Python path", async function(): Promise<
+        void
+      > {
+        const python = await ext.getPython();
+        assert.doesNotThrow(
+          async () => await ext.promiseExec(`${python} --version`)
+        );
+      });
+
+      it("should return 'python' or 'py' if no Python extension", async function(): Promise<
+        void
+      > {
+        // Only works if we do not install the python extention in the test env
+        const python = await ext.getPython();
+        assert(["python", "py"].includes(python));
+      });
+
+      it("should return 'python' or 'py' if setPath undefined", async function(): Promise<
+        void
+      > {
+        const python = await ext.getPython(undefined);
+        assert(["python", "py"].includes(python));
+      });
+    });
+
     context("after extension deactivation", function(): void {
       before("deactivate the extension", function(): void {
         ext.deactivate();
