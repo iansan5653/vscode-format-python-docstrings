@@ -231,13 +231,11 @@ describe("extension.ts", function(): void {
         void
       > {
         const command = await ext.buildFormatCommand("path");
-        // Asserting that the string contains allows for `python -m *` or `py *`
-        assert.notStrictEqual(
-          command.indexOf(
+        assert(
+          command.endsWith(
             // eslint-disable-next-line quotes
             'docformatter "path" --wrap-summaries 79 --wrap-descriptions 72'
-          ),
-          -1
+          )
         );
       });
 
@@ -268,9 +266,10 @@ describe("extension.ts", function(): void {
 
         it("should use the new settings", async function(): Promise<void> {
           const command = await ext.buildFormatCommand("path");
-          assert.strictEqual(
-            command,
-            "docformatter path --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap"
+          assert(
+            command.endsWith(
+              "docformatter path --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap"
+            )
           );
         });
 
