@@ -237,11 +237,9 @@ describe("extension.ts", function(): void {
       });
 
       context("with modified settings in test folder", function(): void {
-        let settings: vscode.WorkspaceConfiguration;
+        const settings = vscode.workspace.getConfiguration("docstringFormatter");
 
         before("change the relevant settings", async function(): Promise<void> {
-          settings = vscode.workspace.getConfiguration("docstringFormatter");
-
           await Promise.all([
             settings.update("wrapSummariesLength", 85, true),
             settings.update("wrapDescriptionsLength", 90, true),
