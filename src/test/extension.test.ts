@@ -240,9 +240,6 @@ describe("extension.ts", function(): void {
         let settings: vscode.WorkspaceConfiguration;
 
         before("change the relevant settings", function(): Thenable<void> {
-          // TODO: Why is VSCode not updating the settings in the test
-          // environment?
-
           settings = vscode.workspace.getConfiguration("docstringFormatter");
 
           return settings
