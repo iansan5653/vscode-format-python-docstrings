@@ -39,7 +39,7 @@
     "jsdoc/require-param-name": 1,
     "no-invalid-this": "off",
     "comma-dangle": ["error", "never"],
-    "quotes": ["error", "double"],
+    "quotes": "off",
     "no-console": "off",
     "no-dupe-class-members": "off",
     "no-param-reassign": "error",
