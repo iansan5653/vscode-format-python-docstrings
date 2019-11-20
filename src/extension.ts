@@ -7,13 +7,21 @@ import {c} from "compress-tag";
 export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
 
+/** Returns the set Python path from user settings. */
+export function getPythonPathSetting(): string | undefined {
+  return vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+}
+
 /**
  * Get the path to the most locally set Python. If Python cannot be found, this
  * will reject. Otherwise, will resolve with the python command.
+ * @param setPath The set Python path. Defaults to user setting. This allows for
+ * testing.
  * @returns A command which can be called to invoke Python in the terminal.
  */
-export async function getPython(): Promise<string> {
-  const setPath = vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+export async function getPython(
+  setPath: string | undefined = getPythonPathSetting()
+): Promise<string> {
   if (setPath !== undefined) {
     try {
       await promiseExec(`"${setPath}" --version`);
@@ -49,10 +57,15 @@ export async function getPython(): Promise<string> {
  *
  * Reads the current settings and implements them or falls back to defaults.
  * @param path Path to the file to be formatted.
+ * @param pythonPromise Promise that resolves to the path to call Python with.
+ * Allows for unit testing.
  * @returns Runnable terminal command that will format the specified file.
  */
-export async function buildFormatCommand(path: string): Promise<string> {
-  const python = await getPython();
+export async function buildFormatCommand(
+  path: string,
+  pythonPromise: Promise<string> = getPython()
+): Promise<string> {
+  const python = await pythonPromise;
   const settings = vscode.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
   const wsl = settings.get<number>("wrapSummariesLength") || 79;
@@ -101,9 +114,7 @@ export async function installDocformatter(): Promise<void> {
 export async function alertFormattingError(
   err: FormatException
 ): Promise<void> {
-  if (
-    err.message.includes("No module named docformatter")
-  ) {
+  if (err.message.includes("No module named docformatter")) {
     const installButton = "Install Module";
     const response = await vscode.window.showErrorMessage(
       c`The Python module 'docformatter' must be installed to format
