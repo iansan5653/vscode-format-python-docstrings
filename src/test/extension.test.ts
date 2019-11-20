@@ -297,9 +297,7 @@ describe("extension.ts", function(): void {
         void
       > {
         const python = await ext.getPython();
-        assert.doesNotThrow(
-          async () => await ext.promiseExec(`${python} --version`)
-        );
+        assert.doesNotReject(ext.promiseExec(`${python} --version`));
       });
 
       it("should return 'python' or 'py' if no Python extension", async function(): Promise<
@@ -315,6 +313,33 @@ describe("extension.ts", function(): void {
       > {
         const python = await ext.getPython(undefined);
         assert(["python", "py"].includes(python));
+      });
+
+      context("with local Python environments", function() {
+        const envName = "exampleEnv";
+
+        before("create a local environment", async function(): Promise<void> {
+          this.timeout("10s");
+          this.slow("4s");
+          const python = await ext.getPython();
+          await ext.promiseExec(`${python} -m venv ${envName}`);
+        });
+
+        it("should run Python from the local environment when desired", async function(): Promise<
+          void
+        > {
+          const python = await ext.getPython(`./${envName}/scripts/python`);
+          assert.doesNotReject(ext.promiseExec(`${python} --version`));
+        });
+
+        it("should properly handle config variables", async function(): Promise<
+          void
+        > {
+          const python = await ext.getPython(
+            `./\${workspaceFolder}/scripts/python`
+          );
+          assert.doesNotReject(ext.promiseExec(`${python} --version`));
+        });
       });
     });
 
