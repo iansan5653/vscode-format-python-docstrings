@@ -332,13 +332,32 @@ describe("extension.ts", function(): void {
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
-        it("should properly handle config variables", async function(): Promise<
-          void
-        > {
-          const python = await ext.getPython(
-            `./\${workspaceFolder}/scripts/python`
-          );
-          assert.doesNotReject(ext.promiseExec(`${python} --version`));
+        context("with config variables", function(): void {
+          it("handles workspaceFolder variable", async function(): Promise<void> {
+            const python = await ext.getPython(
+              `\${workspaceFolder}/scripts/python`
+            );
+            assert.doesNotReject(ext.promiseExec(`${python} --version`));
+          });
+
+          it("handles workspaceFolderBasename variable", async function(): Promise<void> {
+            const python = await ext.getPython(
+              `../\${workspaceFolderBasename}/scripts/python`
+            );
+            assert.doesNotReject(ext.promiseExec(`${python} --version`));
+          });
+
+          it.skip("handles multi-root workspaceFolder variable", async function(): Promise<void> {
+            // TODO
+          });
+
+          it.skip("handles multi-root workspaceFolderBasename variable", async function(): Promise<void> {
+            // TODO
+          });
+
+          it.skip("handles ENV variables", async function(): Promise<void> {
+            // TODO
+          });
         });
       });
     });
