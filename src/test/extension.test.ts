@@ -278,7 +278,7 @@ describe("extension.ts", function(): void {
           const examplePython = "Example Python Path";
           const exampleFile = "Example File Path";
           const command = await ext.buildFormatCommand(
-            "path",
+            exampleFile,
             new Promise((res) => res(examplePython))
           );
           assert.strictEqual(
@@ -286,7 +286,7 @@ describe("extension.ts", function(): void {
             // This function quotes the file path, but expects the python path
             // to be quoted already.
             // eslint-disable-next-line max-len
-            `${examplePython} docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
+            `${examplePython} -m docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
           );
         });
       });
