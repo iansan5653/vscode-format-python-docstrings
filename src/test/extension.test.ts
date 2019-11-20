@@ -239,23 +239,16 @@ describe("extension.ts", function(): void {
       context("with modified settings in test folder", function(): void {
         let settings: vscode.WorkspaceConfiguration;
 
-        before("change the relevant settings", function(): Thenable<void> {
+        before("change the relevant settings", async function(): Promise<void> {
           settings = vscode.workspace.getConfiguration("docstringFormatter");
 
-          return settings
-            .update("wrapSummariesLength", 85, true)
-            .then((): void => {
-              settings.update("wrapDescriptionsLength", 90, true);
-            })
-            .then((): void => {
-              settings.update("preSummaryNewline", true, true);
-            })
-            .then((): void => {
-              settings.update("makeSummaryMultiline", true, true);
-            })
-            .then((): void => {
-              settings.update("forceWrap", true, true);
-            });
+          await Promise.all([
+            settings.update("wrapSummariesLength", 85, true),
+            settings.update("wrapDescriptionsLength", 90, true),
+            settings.update("preSummaryNewline", true, true),
+            settings.update("makeSummaryMultiline", true, true),
+            settings.update("forceWrap", true, true)
+          ]);
         });
 
         it("should use the new settings", async function(): Promise<void> {
@@ -265,23 +258,16 @@ describe("extension.ts", function(): void {
           assert(command.endsWith(expectedCommandWithoutPy));
         });
 
-        after("reset the settings back to defaults", function(): Thenable<
+        after("reset the settings back to defaults", async function(): Promise<
           void
         > {
-          return settings
-            .update("wrapSummariesLength", undefined, true)
-            .then((): void => {
-              settings.update("wrapDescriptionsLength", undefined, true);
-            })
-            .then((): void => {
-              settings.update("preSummaryNewline", undefined, true);
-            })
-            .then((): void => {
-              settings.update("makeSummaryMultiline", undefined, true);
-            })
-            .then((): void => {
-              settings.update("forceWrap", undefined, true);
-            });
+          await Promise.all([
+            settings.update("wrapSummariesLength", undefined, true),
+            settings.update("wrapDescriptionsLength", undefined, true),
+            settings.update("preSummaryNewline", undefined, true),
+            settings.update("makeSummaryMultiline", undefined, true),
+            settings.update("forceWrap", undefined, true)
+          ]);
         });
       });
     });
