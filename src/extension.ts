@@ -25,7 +25,7 @@ export async function getPython(
   if (setPath !== undefined) {
     try {
       await promiseExec(`"${setPath}" --version`);
-      return setPath;
+      return `"${setPath}"`;
     } catch (err) {
       vscode.window.showErrorMessage(c`
         The Python path set in the "python.pythonPath" setting is invalid. Check

@@ -272,7 +272,7 @@ describe("extension.ts", function(): void {
       });
 
       context("with custom pythonPath", function(): void {
-        it("should await custom pythonPath and quote it", async function(): Promise<
+        it("should await custom pythonPath and use it", async function(): Promise<
           void
         > {
           const examplePython = "Example Python Path";
@@ -283,8 +283,10 @@ describe("extension.ts", function(): void {
           );
           assert.strictEqual(
             command,
+            // This function quotes the file path, but expects the python path
+            // to be quoted already.
             // eslint-disable-next-line max-len
-            `"${examplePython}" docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
+            `${examplePython} docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
           );
         });
       });
