@@ -237,7 +237,9 @@ describe("extension.ts", function(): void {
       });
 
       context("with modified settings in test folder", function(): void {
-        const settings = vscode.workspace.getConfiguration("docstringFormatter");
+        const settings = vscode.workspace.getConfiguration(
+          "docstringFormatter"
+        );
 
         before("change the relevant settings", async function(): Promise<void> {
           await Promise.all([
@@ -266,6 +268,24 @@ describe("extension.ts", function(): void {
             settings.update("makeSummaryMultiline", undefined, true),
             settings.update("forceWrap", undefined, true)
           ]);
+        });
+      });
+
+      context("with custom pythonPath", function(): void {
+        it("should await custom pythonPath and quote it", async function(): Promise<
+          void
+        > {
+          const examplePython = "Example Python Path";
+          const exampleFile = "Example File Path";
+          const command = await ext.buildFormatCommand(
+            "path",
+            new Promise((res) => res(examplePython))
+          );
+          assert.strictEqual(
+            command,
+            // eslint-disable-next-line max-len
+            `"${examplePython}" docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
+          );
         });
       });
     });
