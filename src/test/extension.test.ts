@@ -224,22 +224,19 @@ describe("extension.ts", function(): void {
       it("should contain the passed path", async function(): Promise<void> {
         const path = "c:/example-path/document.py";
         const command = await ext.buildFormatCommand(path);
-        assert.notStrictEqual(command.indexOf(path), -1);
+        assert(command.includes(path));
       });
 
       it("should implement the correct defaults", async function(): Promise<
         void
       > {
         const command = await ext.buildFormatCommand("path");
-        assert(
-          command.endsWith(
-            // eslint-disable-next-line quotes
-            'docformatter "path" --wrap-summaries 79 --wrap-descriptions 72'
-          )
-        );
+        const expectedCommandWithoutPy =
+          'docformatter "path" --wrap-summaries 79 --wrap-descriptions 72';
+        assert(command.endsWith(expectedCommandWithoutPy));
       });
 
-      context.skip("with modified settings in test folder", function(): void {
+      context("with modified settings in test folder", function(): void {
         let settings: vscode.WorkspaceConfiguration;
 
         before("change the relevant settings", function(): Thenable<void> {
@@ -266,11 +263,11 @@ describe("extension.ts", function(): void {
 
         it("should use the new settings", async function(): Promise<void> {
           const command = await ext.buildFormatCommand("path");
-          assert(
-            command.endsWith(
-              "docformatter path --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap"
-            )
-          );
+          const expectedCommandWithoutPy =
+            'docformatter "path" --wrap-summaries 85 --wrap-descriptions 90 --blank --make-summary-multi-line --force-wrap';
+          console.log(command);
+          console.log(expectedCommandWithoutPy);
+          assert(command.endsWith(expectedCommandWithoutPy));
         });
 
         after("reset the settings back to defaults", function(): Thenable<
