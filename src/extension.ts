@@ -4,7 +4,19 @@ import * as cp from "child_process";
 import * as diff from "diff";
 import {c} from "compress-tag";
 
-export const promiseExec = util.promisify(cp.exec);
+/**
+ * Promisified `exec` function, but with `cwd` bound to the workspace directory.
+ * @param command The command to run.
+ * @param opts Any other options to pass to `cp.exec`.
+ */
+export function promiseExec(
+  command: string,
+  opts?: cp.ExecOptions
+): Promise<{stdout: string; stderr: string}> {
+  const workspaceDirectory = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  return util.promisify(cp.exec)(command, {cwd: workspaceDirectory, ...opts});
+}
+
 export let registration: vscode.Disposable | undefined;
 
 /** Returns the set Python path from user settings. */
