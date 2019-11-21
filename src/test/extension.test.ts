@@ -4,11 +4,11 @@ import * as ext from "../extension";
 import {Hunk} from "diff";
 import * as path from "path";
 
-const testPythonFiles: Readonly<Record<string, string>> = {
+const testPythonFiles: Readonly<Record<string, string[]>> = {
   /** The basic test file with no quirks. */
-  base: "/../../src/test/example.py",
+  base: ["..", "...", "src", "test", "example.py"],
   /** A test file where the path contains spaces. */
-  spacesInName: "/../../src/test/example with spaces in name.py"
+  spacesInName: ["..", "...", "src", "test", "example with spaces in name.py"]
 };
 /** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
@@ -47,9 +47,11 @@ describe("extension.ts", function(): void {
     before("open test files", async function(): Promise<void> {
       // Open a text doc, then wait for the the extension to be active.
       const documentsList = await Promise.all([
-        vscode.workspace.openTextDocument(__dirname + testPythonFiles.base),
         vscode.workspace.openTextDocument(
-          __dirname + testPythonFiles.spacesInName
+          path.resolve(__dirname, ...testPythonFiles.base)
+        ),
+        vscode.workspace.openTextDocument(
+          path.resolve(__dirname, ...testPythonFiles.spacesInName)
         )
       ]);
       documents.base = documentsList[0];
@@ -329,7 +331,7 @@ describe("extension.ts", function(): void {
         it("should run Python from the local environment when desired", async function(): Promise<
           void
         > {
-          const python = await ext.getPython(`./${envName}/scripts/python`);
+          const python = await ext.getPython(path.resolve(".", envName, "scripts", "python"));
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
@@ -337,7 +339,7 @@ describe("extension.ts", function(): void {
           void
         > {
           const python = await ext.getPython(
-            `\${workspaceFolder}/scripts/python`
+            path.resolve("${workspaceFolder}", "scripts", "python")
           );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
@@ -354,14 +356,20 @@ describe("extension.ts", function(): void {
         [
           "out",
           {
-            uri: vscode.Uri.parse(`file://${path.resolve(__dirname, "..")}/`, true),
+            uri: vscode.Uri.parse(
+              `file://${path.resolve(__dirname, "..")}/`,
+              true
+            ),
             name: "out"
           }
         ],
         [
           "source",
           {
-            uri: vscode.Uri.parse(`file://${path.resolve(__dirname, "..", "..", "src")}`, true),
+            uri: vscode.Uri.parse(
+              `file://${path.resolve(__dirname, "..", "..", "src")}`,
+              true
+            ),
             name: "source"
           }
         ]
@@ -388,7 +396,10 @@ describe("extension.ts", function(): void {
       > {
         assert.strictEqual(
           ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
-          `text/${folders.get("out")?.uri.path.split("/").pop()}/test`
+          `text/${folders
+            .get("out")
+            ?.uri.path.split("/")
+            .pop()}/test`
         );
       });
 
@@ -408,7 +419,10 @@ describe("extension.ts", function(): void {
           ext.replaceWorkspaceVariables(
             "text/${workspaceFolderBasename:source}/text"
           ),
-          `text/${folders.get("source")?.uri.path.split("/").pop()}/text`
+          `text/${folders
+            .get("source")
+            ?.uri.path.split("/")
+            .pop()}/text`
         );
       });
 
