@@ -4,24 +4,50 @@ import * as cp from "child_process";
 import * as diff from "diff";
 import {c} from "compress-tag";
 
+export let registration: vscode.Disposable | undefined;
+
 /**
- * Promisified `exec` function, but with `cwd` bound to the workspace directory.
+ * Replaces the standard VSCode variables `${workspaceFolder}` and
+ * `${workspaceFolderBasename}` with their correct values. Supports the
+ * `${workspaceFolder:folderName}` as defined in the spec for multi-root
+ * workspaces.
+ * @param text The text to replace values in.
+ * @returns The input string with the variables replaced.
+ */
+export function replaceWorkspaceVariables(text: string): string {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  return text.replace(
+    /\${workspaceFolder(Basename)?(:[^}]*)?}/g,
+    (_, baseOnly: string, dirName: string): string => {
+      const targetFolder = dirName
+        ? workspaceFolders?.find((folder): boolean => folder.name === dirName)
+        : workspaceFolders?.[0];
+      return (baseOnly ? targetFolder?.uri.fsPath : targetFolder?.name) ?? "";
+    }
+  );
+}
+
+/**
+ * Promisified `exec` function, but with `cwd` bound to the workspace directory
+ * (the first one in a multi-root space).
  * @param command The command to run.
  * @param opts Any other options to pass to `cp.exec`.
+ * @returns Promise that resolves with the output of running the command.
  */
 export function promiseExec(
   command: string,
   opts?: cp.ExecOptions
 ): Promise<{stdout: string; stderr: string}> {
-  const workspaceDirectory = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspaceDirectory = // undefined if replaceWorkspaceVariables => ""
+    replaceWorkspaceVariables("${workspaceFolder}") || undefined;
   return util.promisify(cp.exec)(command, {cwd: workspaceDirectory, ...opts});
 }
 
-export let registration: vscode.Disposable | undefined;
-
-/** Returns the set Python path from user settings. */
+/** Returns the set Python path from settings without replacing variables. */
 export function getPythonPathSetting(): string | undefined {
-  return vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+  return vscode.workspace
+    .getConfiguration("python")
+    .get<string>("pythonPath");
 }
 
 /**
@@ -35,9 +61,10 @@ export async function getPython(
   setPath: string | undefined = getPythonPathSetting()
 ): Promise<string> {
   if (setPath !== undefined) {
+    const cookedPath = replaceWorkspaceVariables(setPath);
     try {
-      await promiseExec(`"${setPath}" --version`);
-      return `"${setPath}"`;
+      await promiseExec(`"${cookedPath}" --version`);
+      return `"${cookedPath}"`;
     } catch (err) {
       vscode.window.showErrorMessage(c`
         The Python path set in the "python.pythonPath" setting is invalid. Check
@@ -46,6 +73,7 @@ export async function getPython(
       throw err;
     }
   }
+
   try {
     await promiseExec("python --version");
     return "python";

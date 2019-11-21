@@ -348,26 +348,36 @@ describe("extension.ts", function(): void {
       });
     });
 
-    context("#replaceVscodeVariables", function(): void {
-      let currentFolder: vscode.WorkspaceFolder | undefined = undefined;
-      const newFolder = {
-        uri: vscode.Uri.parse(`file://${__dirname}../../src`),
-        name: "source"
-      };
+    context("#replaceWorkspaceVariables", function(): void {
+      const folders = new Map([
+        [
+          "current",
+          {
+            uri: vscode.Uri.parse(`file://${__dirname}/`),
+            name: "current"
+          }
+        ],
+        [
+          "source",
+          {
+            uri: vscode.Uri.parse(`file://${__dirname}../../src`),
+            name: "source"
+          }
+        ]
+      ]);
 
       before("set up workspaces", function() {
-        currentFolder = vscode.workspace.workspaceFolders?.[0];
         vscode.workspace.updateWorkspaceFolders(
+          0,
           vscode.workspace.workspaceFolders?.length ?? 0,
-          null,
-          newFolder
+          ...Array.from(folders, ([, folder]) => folder)
         );
       });
 
       it("handles {workspaceFolder} variable", async function(): Promise<void> {
         assert.strictEqual(
-          ext.replaceVscodeVariables("text/${workspaceFolder}/text"),
-          `test/${currentFolder?.uri.fsPath}/test`
+          ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
+          `test/${folders.get("current")?.uri.fsPath}/test`
         );
       });
 
@@ -375,8 +385,8 @@ describe("extension.ts", function(): void {
         void
       > {
         assert.strictEqual(
-          ext.replaceVscodeVariables("text/${workspaceFolder}/text"),
-          `test/${currentFolder?.name}/test`
+          ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
+          `test/${folders.get("current")?.uri.path.split("/").pop()}/test`
         );
       });
 
@@ -384,8 +394,8 @@ describe("extension.ts", function(): void {
         void
       > {
         assert.strictEqual(
-          ext.replaceVscodeVariables("text/${workspaceFolder:source}/text"),
-          `test/${newFolder.uri.fsPath}/test`
+          ext.replaceWorkspaceVariables("text/${workspaceFolder:source}/text"),
+          `test/${folders.get("source")?.uri.fsPath}/test`
         );
       });
 
@@ -393,10 +403,10 @@ describe("extension.ts", function(): void {
         void
       > {
         assert.strictEqual(
-          ext.replaceVscodeVariables(
+          ext.replaceWorkspaceVariables(
             "text/${workspaceFolderBasename:source}/text"
           ),
-          `test/${newFolder.name}/test`
+          `test/${folders.get("source")?.uri.path.split("/").pop()}/test`
         );
       });
 
