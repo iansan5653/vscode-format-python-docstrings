@@ -5,7 +5,7 @@ async function main(): Promise<void> {
   try {
     const extensionDevelopmentPath = path.resolve(__dirname, "../../");
     const extensionTestsPath = path.resolve(__dirname, "./index");
-    const workspacePath = path.resolve(__dirname, "./testspace.code-workspace");
+    const workspacePath = path.resolve(extensionDevelopmentPath, "src/test/testspace.code-workspace");
 
     await runTests({
       version: "stable",

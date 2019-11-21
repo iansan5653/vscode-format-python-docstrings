@@ -3,6 +3,7 @@ import * as util from "util";
 import * as cp from "child_process";
 import * as diff from "diff";
 import {c} from "compress-tag";
+import * as path from "path";
 
 export let registration: vscode.Disposable | undefined;
 
@@ -19,10 +20,10 @@ export function replaceWorkspaceVariables(text: string): string {
   return text.replace(
     /\${workspaceFolder(Basename)?(:[^}]*)?}/g,
     (_, baseOnly: string, dirName: string): string => {
-      const targetFolder = dirName
+      const targetFolder = (dirName
         ? workspaceFolders?.find((folder): boolean => folder.name === dirName)
-        : workspaceFolders?.[0];
-      return (baseOnly ? targetFolder?.uri.fsPath : targetFolder?.name) ?? "";
+        : workspaceFolders?.[0])?.uri.fsPath;
+      return (baseOnly ? path.parse(targetFolder ?? "").base : targetFolder) ?? "";
     }
   );
 }
@@ -45,9 +46,7 @@ export function promiseExec(
 
 /** Returns the set Python path from settings without replacing variables. */
 export function getPythonPathSetting(): string | undefined {
-  return vscode.workspace
-    .getConfiguration("python")
-    .get<string>("pythonPath");
+  return vscode.workspace.getConfiguration("python").get<string>("pythonPath");
 }
 
 /**
