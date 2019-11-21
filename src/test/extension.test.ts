@@ -332,33 +332,76 @@ describe("extension.ts", function(): void {
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
-        context("with config variables", function(): void {
-          it("handles workspaceFolder variable", async function(): Promise<void> {
-            const python = await ext.getPython(
-              `\${workspaceFolder}/scripts/python`
-            );
-            assert.doesNotReject(ext.promiseExec(`${python} --version`));
-          });
-
-          it("handles workspaceFolderBasename variable", async function(): Promise<void> {
-            const python = await ext.getPython(
-              `../\${workspaceFolderBasename}/scripts/python`
-            );
-            assert.doesNotReject(ext.promiseExec(`${python} --version`));
-          });
-
-          it.skip("handles multi-root workspaceFolder variable", async function(): Promise<void> {
-            // TODO
-          });
-
-          it.skip("handles multi-root workspaceFolderBasename variable", async function(): Promise<void> {
-            // TODO
-          });
-
-          it.skip("handles ENV variables", async function(): Promise<void> {
-            // TODO
-          });
+        it.skip("handles workspaceFolder variable", async function(): Promise<
+          void
+        > {
+          const python = await ext.getPython(
+            `\${workspaceFolder}/scripts/python`
+          );
+          assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
+
+        after("delete local environment", async function(): Promise<void> {
+          // TODO: Uncomment when recursive option is not experimental
+          // await rmdir(`./${envName}`, {recursive: true});
+        });
+      });
+    });
+
+    context("#replaceVscodeVariables", function(): void {
+      let currentFolder: vscode.WorkspaceFolder | undefined = undefined;
+      const newFolder = {
+        uri: vscode.Uri.parse(`file://${__dirname}../../src`),
+        name: "source"
+      };
+
+      before("set up workspaces", function() {
+        currentFolder = vscode.workspace.workspaceFolders?.[0];
+        vscode.workspace.updateWorkspaceFolders(
+          vscode.workspace.workspaceFolders?.length ?? 0,
+          null,
+          newFolder
+        );
+      });
+
+      it("handles {workspaceFolder} variable", async function(): Promise<void> {
+        assert.strictEqual(
+          ext.replaceVscodeVariables("text/${workspaceFolder}/text"),
+          `test/${currentFolder?.uri.fsPath}/test`
+        );
+      });
+
+      it("handles {workspaceFolderBasename} variable", async function(): Promise<
+        void
+      > {
+        assert.strictEqual(
+          ext.replaceVscodeVariables("text/${workspaceFolder}/text"),
+          `test/${currentFolder?.name}/test`
+        );
+      });
+
+      it("handles {workspaceFolder:name} variable", async function(): Promise<
+        void
+      > {
+        assert.strictEqual(
+          ext.replaceVscodeVariables("text/${workspaceFolder:source}/text"),
+          `test/${newFolder.uri.fsPath}/test`
+        );
+      });
+
+      it("handles {workspaceFolderBasename:name} variable", async function(): Promise<
+        void
+      > {
+        assert.strictEqual(
+          ext.replaceVscodeVariables(
+            "text/${workspaceFolderBasename:source}/text"
+          ),
+          `test/${newFolder.name}/test`
+        );
+      });
+
+      after("remove extra workspace", function(): void {
+        vscode.workspace.updateWorkspaceFolders(1, 1);
       });
     });
 
