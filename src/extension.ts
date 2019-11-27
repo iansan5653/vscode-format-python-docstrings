@@ -17,7 +17,7 @@ export let registration: vscode.Disposable | undefined;
  */
 export function replaceWorkspaceVariables(text: string): string {
   const workspaceFolders = vscode.workspace.workspaceFolders;
-  return text.replace(
+  const result = text.replace(
     /\${workspaceFolder(Basename)?(:[^}]*)?}/g,
     (_, baseOnly: string, dirName: string): string => {
       const targetFolder = (dirName
@@ -26,21 +26,25 @@ export function replaceWorkspaceVariables(text: string): string {
       return (baseOnly ? path.parse(targetFolder ?? "").base : targetFolder) ?? "";
     }
   );
+  return result;
 }
 
 /**
- * Promisified `exec` function, but with `cwd` bound to the workspace directory
- * (the first one in a multi-root space).
+ * Promisified `exec` function, but with `cwd` bound to a workspace directory.
  * @param command The command to run.
  * @param opts Any other options to pass to `cp.exec`.
+ * @param workspaceFolder The name of the workspace folder to bind the `cwd`
+ * setting to. If not provided, will use the first folder in the workspace.
  * @returns Promise that resolves with the output of running the command.
  */
 export function promiseExec(
   command: string,
-  opts?: cp.ExecOptions
+  opts?: cp.ExecOptions,
+  workspaceFolder?: string
 ): Promise<{stdout: string; stderr: string}> {
-  const workspaceDirectory = // undefined if replaceWorkspaceVariables => ""
-    replaceWorkspaceVariables("${workspaceFolder}") || undefined;
+  const folderName = workspaceFolder ? `:${workspaceFolder}` : "";
+  const workspaceDirectory = // undefined if replaceWorkspaceVariables yields ""
+    replaceWorkspaceVariables(`\${workspaceFolder${folderName}}`) || undefined;
   return util.promisify(cp.exec)(command, {cwd: workspaceDirectory, ...opts});
 }
 
