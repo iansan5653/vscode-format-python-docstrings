@@ -322,8 +322,8 @@ describe("extension.ts", function(): void {
         const envName = "exampleEnv";
 
         before("create a local environment", async function(): Promise<void> {
-          this.timeout("10s");
-          this.slow("4s");
+          this.timeout("20s");
+          this.slow("10s");
           const python = await ext.getPython();
           await ext.promiseExec(`${python} -m venv ${envName}`);
         });
