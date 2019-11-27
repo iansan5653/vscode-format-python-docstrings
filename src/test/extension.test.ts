@@ -4,14 +4,37 @@ import * as ext from "../extension";
 import {Hunk} from "diff";
 import * as path from "path";
 
-const testPythonFiles: Readonly<Record<string, string[]>> = {
+const examplePaths: Readonly<Record<string, string[]>> = {
   /** The basic test file with no quirks. */
-  base: ["..", "...", "src", "test", "example.py"],
+  basicPythonFile: ["..", "..", "src", "test", "example.py"],
   /** A test file where the path contains spaces. */
-  spacesInName: ["..", "...", "src", "test", "example with spaces in name.py"]
+  pythonFileWithSpaces: [
+    "..",
+    "..",
+    "src",
+    "test",
+    "example with spaces in name.py"
+  ],
+  /** Sample workspace folder A. */
+  workspaceFolderA: [
+    "..",
+    "..",
+    "src",
+    "test",
+    "test-folders",
+    "test-folder-a"
+  ],
+  /** Sample workspace folder B. */
+  workspaceFolderB: ["..", "..", "src", "test", "test-folders", "test-folder-b"]
 };
 /** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
+/** The name of the workspace folder containing the root test directory. */
+const workspaceFolders = {
+  test: "test",
+  A: "FolderA",
+  B: "FolderB"
+};
 
 describe("extension.ts", function(): void {
   context("prior to extension activation", function(): void {
@@ -48,10 +71,10 @@ describe("extension.ts", function(): void {
       // Open a text doc, then wait for the the extension to be active.
       const documentsList = await Promise.all([
         vscode.workspace.openTextDocument(
-          path.resolve(__dirname, ...testPythonFiles.base)
+          path.resolve(__dirname, ...examplePaths.basicPythonFile)
         ),
         vscode.workspace.openTextDocument(
-          path.resolve(__dirname, ...testPythonFiles.spacesInName)
+          path.resolve(__dirname, ...examplePaths.pythonFileWithSpaces)
         )
       ]);
       documents.base = documentsList[0];
@@ -325,13 +348,19 @@ describe("extension.ts", function(): void {
           this.timeout("20s");
           this.slow("10s");
           const python = await ext.getPython();
-          await ext.promiseExec(`${python} -m venv ${envName}`);
+          await ext.promiseExec(
+            `${python} -m venv ${envName}`,
+            undefined,
+            workspaceFolders.test
+          );
         });
 
         it("should run Python from the local environment when desired", async function(): Promise<
           void
         > {
-          const python = await ext.getPython(path.resolve(".", envName, "scripts", "python"));
+          const python = await ext.getPython(
+            path.resolve(".", envName, "scripts", "python")
+          );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
@@ -339,7 +368,11 @@ describe("extension.ts", function(): void {
           void
         > {
           const python = await ext.getPython(
-            path.resolve("${workspaceFolder}", "scripts", "python")
+            path.resolve(
+              `\${workspaceFolder:${workspaceFolders.test}}`,
+              "scripts",
+              "python"
+            )
           );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
@@ -352,54 +385,23 @@ describe("extension.ts", function(): void {
     });
 
     context("#replaceWorkspaceVariables", function(): void {
-      const folders = new Map([
-        [
-          "out",
-          {
-            uri: vscode.Uri.parse(
-              `file://${path.resolve(__dirname, "..")}/`,
-              true
-            ),
-            name: "out"
-          }
-        ],
-        [
-          "source",
-          {
-            uri: vscode.Uri.parse(
-              `file://${path.resolve(__dirname, "..", "..", "src")}`,
-              true
-            ),
-            name: "source"
-          }
-        ]
-      ]);
-
-      before("set up workspaces", function() {
-        vscode.workspace.updateWorkspaceFolders(
-          0,
-          vscode.workspace.workspaceFolders?.length ?? 0,
-          ...Array.from(folders, ([, folder]) => folder)
-        );
-        console.log("------>", vscode.workspace.workspaceFolders);
-      });
-
       it("handles {workspaceFolder} variable", async function(): Promise<void> {
         assert.strictEqual(
           ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
-          `text/${folders.get("out")?.uri.fsPath}/text`
+          `text/${path.resolve(
+            __dirname,
+            ...examplePaths.workspaceFolderA
+          )}/text`
         );
       });
 
       it("handles {workspaceFolderBasename} variable", async function(): Promise<
         void
       > {
+        const path = examplePaths.workspaceFolderA;
         assert.strictEqual(
-          ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
-          `text/${folders
-            .get("out")
-            ?.uri.path.split("/")
-            .pop()}/test`
+          ext.replaceWorkspaceVariables("text/${workspaceFolderBasename}/text"),
+          `text/${path[path.length - 1]}/text`
         );
       });
 
@@ -407,27 +409,26 @@ describe("extension.ts", function(): void {
         void
       > {
         assert.strictEqual(
-          ext.replaceWorkspaceVariables("text/${workspaceFolder:source}/text"),
-          `text/${folders.get("source")?.uri.fsPath}/text`
+          ext.replaceWorkspaceVariables(
+            `text/\${workspaceFolder:${workspaceFolders.B}}/text`
+          ),
+          `text/${path.resolve(
+            __dirname,
+            ...examplePaths.workspaceFolderB
+          )}/text`
         );
       });
 
       it("handles {workspaceFolderBasename:name} variable", async function(): Promise<
         void
       > {
+        const path = examplePaths.workspaceFolderB;
         assert.strictEqual(
           ext.replaceWorkspaceVariables(
-            "text/${workspaceFolderBasename:source}/text"
+            `text/\${workspaceFolderBasename:${workspaceFolders.B}}/text`
           ),
-          `text/${folders
-            .get("source")
-            ?.uri.path.split("/")
-            .pop()}/text`
+          `text/${path[path.length - 1]}/text`
         );
-      });
-
-      after("remove extra workspace", function(): void {
-        vscode.workspace.updateWorkspaceFolders(1, 1);
       });
     });
 

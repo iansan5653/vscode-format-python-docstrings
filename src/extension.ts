@@ -18,12 +18,12 @@ export let registration: vscode.Disposable | undefined;
 export function replaceWorkspaceVariables(text: string): string {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   const result = text.replace(
-    /\${workspaceFolder(Basename)?(:[^}]*)?}/g,
-    (_, baseOnly: string, dirName: string): string => {
+    /\${workspaceFolder(Basename)?:?([^}]*)?}/g,
+    (_, baseOnly?: string, dirName?: string): string => {
       const targetFolder = (dirName
         ? workspaceFolders?.find((folder): boolean => folder.name === dirName)
         : workspaceFolders?.[0])?.uri.fsPath;
-      return (baseOnly ? path.parse(targetFolder ?? "").base : targetFolder) ?? "";
+      return (baseOnly ? path.basename(targetFolder ?? "") : targetFolder) ?? "";
     }
   );
   return result;

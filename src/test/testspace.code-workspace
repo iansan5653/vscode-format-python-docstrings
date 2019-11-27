@@ -2,11 +2,11 @@
   "folders": [
     {
       "path": "./test-folders/test-folder-a",
-      "name": "A"
+      "name": "FolderA"
     },
     {
       "path": "./test-folders/test-folder-b",
-      "name": "A"
+      "name": "FolderB"
     },
     {
       "path": ".",
