@@ -6,6 +6,10 @@ jobs:
       demands: npm
     steps:
       - task: Npm@1
+        displayName: "Install dependencies"
+        inputs:
+          verbose: false
+      - task: Npm@1
         displayName: "Lint"
         inputs:
           command: custom
