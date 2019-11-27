@@ -4,28 +4,24 @@ import * as ext from "../extension";
 import {Hunk} from "diff";
 import * as path from "path";
 
+/** Relative path to the source test folder. */
+const testFolder = ["..", "..", "src", "test"];
 const examplePaths: Readonly<Record<string, string[]>> = {
   /** The basic test file with no quirks. */
-  basicPythonFile: ["..", "..", "src", "test", "example.py"],
+  basicPythonFile: [...testFolder, "example.py"],
   /** A test file where the path contains spaces. */
   pythonFileWithSpaces: [
-    "..",
-    "..",
-    "src",
-    "test",
+    ...testFolder,
     "example with spaces in name.py"
   ],
   /** Sample workspace folder A. */
   workspaceFolderA: [
-    "..",
-    "..",
-    "src",
-    "test",
+    ...testFolder,
     "test-folders",
     "test-folder-a"
   ],
   /** Sample workspace folder B. */
-  workspaceFolderB: ["..", "..", "src", "test", "test-folders", "test-folder-b"]
+  workspaceFolderB: [...testFolder, "test-folders", "test-folder-b"]
 };
 /** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
@@ -345,7 +341,7 @@ describe("extension.ts", function(): void {
         const envName = "exampleEnv";
 
         before("create a local environment", async function(): Promise<void> {
-          this.timeout("20s");
+          this.timeout("30s");
           this.slow("10s");
           const python = await ext.getPython();
           await ext.promiseExec(
@@ -359,7 +355,7 @@ describe("extension.ts", function(): void {
           void
         > {
           const python = await ext.getPython(
-            path.resolve(".", envName, "scripts", "python")
+            path.resolve(__dirname, ...testFolder, envName, "scripts", "python")
           );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
