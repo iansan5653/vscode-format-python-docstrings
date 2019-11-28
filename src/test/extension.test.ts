@@ -10,16 +10,9 @@ const examplePaths: Readonly<Record<string, string[]>> = {
   /** The basic test file with no quirks. */
   basicPythonFile: [...testFolder, "example.py"],
   /** A test file where the path contains spaces. */
-  pythonFileWithSpaces: [
-    ...testFolder,
-    "example with spaces in name.py"
-  ],
+  pythonFileWithSpaces: [...testFolder, "example with spaces in name.py"],
   /** Sample workspace folder A. */
-  workspaceFolderA: [
-    ...testFolder,
-    "test-folders",
-    "test-folder-a"
-  ],
+  workspaceFolderA: [...testFolder, "test-folders", "test-folder-a"],
   /** Sample workspace folder B. */
   workspaceFolderB: [...testFolder, "test-folders", "test-folder-b"]
 };
@@ -339,8 +332,14 @@ describe("extension.ts", function(): void {
 
       context("with local Python environments", function() {
         const envName = "exampleEnv";
+        // On Linux devices, the Python executable in a virtual environment is
+        // located in the `bin` folder. On Windows, it's `scripts/python.exe`.
+        // process.platform is always "win32" on windows, even on win64.
+        // FIXME: Add Mac case and remove skips.
+        const subfolder = process.platform === "win32" ? "scripts" : "bin";
 
         before("create a local environment", async function(): Promise<void> {
+          if (process.platform === "darwin") return this.skip();
           this.timeout("30s");
           this.slow("10s");
           const python = await ext.getPython();
@@ -354,26 +353,20 @@ describe("extension.ts", function(): void {
         it("should run Python from the local environment when desired", async function(): Promise<
           void
         > {
-          // FIXME: Determine Mac virtual environment structure and fix the test
-          // for Mac.
           if (process.platform === "darwin") return this.skip();
-          // On Linux devices, the Python executable in a virtual environment is
-          // located in the `bin` folder. On Windows, it's `scripts/python.exe`.
-          // process.platform is always "win32" on windows, even on win64.
-          const subfolder = process.platform === "win32" ? "scripts" : "bin";
           const python = await ext.getPython(
             path.resolve(__dirname, ...testFolder, envName, subfolder, "python")
           );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
-        it.skip("handles workspaceFolder variable", async function(): Promise<
-          void
-        > {
+        it("handles workspaceFolder variable", async function(): Promise<void> {
+          if (process.platform === "darwin") return this.skip();
           const python = await ext.getPython(
             path.resolve(
               `\${workspaceFolder:${workspaceFolders.test}}`,
-              "scripts",
+              envName,
+              subfolder,
               "python"
             )
           );
