@@ -354,7 +354,10 @@ describe("extension.ts", function(): void {
         it("should run Python from the local environment when desired", async function(): Promise<
           void
         > {
-          // On Unix devices, the Python executable in a virtual environment is
+          // FIXME: Determine Mac virtual environment structure and fix the test
+          // for Mac.
+          if (process.platform === "darwin") return this.skip();
+          // On Linux devices, the Python executable in a virtual environment is
           // located in the `bin` folder. On Windows, it's `scripts/python.exe`.
           // process.platform is always "win32" on windows, even on win64.
           const subfolder = process.platform === "win32" ? "scripts" : "bin";
