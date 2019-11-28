@@ -354,8 +354,12 @@ describe("extension.ts", function(): void {
         it("should run Python from the local environment when desired", async function(): Promise<
           void
         > {
+          // On Unix devices, the Python executable in a virtual environment is
+          // located in the `bin` folder. On Windows, it's `scripts/python.exe`.
+          // process.platform is always "win32" on windows, even on win64.
+          const subfolder = process.platform === "win32" ? "scripts" : "bin";
           const python = await ext.getPython(
-            path.resolve(__dirname, ...testFolder, envName, "scripts", "python")
+            path.resolve(__dirname, ...testFolder, envName, subfolder, "python")
           );
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
