@@ -307,6 +307,27 @@ describe("extension.ts", function(): void {
       });
     });
 
+    describe("#checkPointsToPython3()", function(): void {
+      it("should return false and not error on invalid command", async function(): Promise<
+        void
+      > {
+        const python = await ext.checkPointsToPython3("notPythonCommand");
+        assert(!python);
+      });
+
+      it("should return true on valid command", async function(): Promise<
+        void
+      > {
+        const possibleCommands = ["python", "py", "python3"];
+        let success = false;
+        for (const command of possibleCommands) {
+          success = await ext.checkPointsToPython3(command);
+          if (success) break;
+        }
+        assert(success);
+      });
+    });
+
     describe("#getPython()", function(): void {
       it("should return a runnable Python path", async function(): Promise<
         void
@@ -315,19 +336,19 @@ describe("extension.ts", function(): void {
         assert.doesNotReject(ext.promiseExec(`${python} --version`));
       });
 
-      it("should return 'python' or 'py' if no Python extension", async function(): Promise<
+      it("should return a default Python command if no Python extension", async function(): Promise<
         void
       > {
         // Only works if we do not install the python extention in the test env
         const python = await ext.getPython();
-        assert(["python", "py"].includes(python));
+        assert(["python", "py", "python3"].includes(python));
       });
 
-      it("should return 'python' or 'py' if setPath undefined", async function(): Promise<
+      it("should return a default Python command if setPath undefined", async function(): Promise<
         void
       > {
         const python = await ext.getPython(undefined);
-        assert(["python", "py"].includes(python));
+        assert(["python", "py", "python3"].includes(python));
       });
 
       context("with local Python environments", function() {
