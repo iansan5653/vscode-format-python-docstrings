@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import * as ext from "../extension";
-import {Hunk, convertChangesToXML} from "diff";
+import {Hunk} from "diff";
 import * as path from "path";
 
 /** Relative path to the source test folder. */
