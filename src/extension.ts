@@ -3,21 +3,71 @@ import * as util from "util";
 import * as cp from "child_process";
 import * as diff from "diff";
 import {c} from "compress-tag";
+import * as path from "path";
 
-export const promiseExec = util.promisify(cp.exec);
 export let registration: vscode.Disposable | undefined;
+
+/**
+ * Replaces the standard VSCode variables `${workspaceFolder}` and
+ * `${workspaceFolderBasename}` with their correct values. Supports the
+ * `${workspaceFolder:folderName}` as defined in the spec for multi-root
+ * workspaces.
+ * @param text The text to replace values in.
+ * @returns The input string with the variables replaced.
+ */
+export function replaceWorkspaceVariables(text: string): string {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const result = text.replace(
+    /\${workspaceFolder(Basename)?:?([^}]*)?}/g,
+    (_, baseOnly?: string, dirName?: string): string => {
+      const targetFolder = (dirName
+        ? workspaceFolders?.find((folder): boolean => folder.name === dirName)
+        : workspaceFolders?.[0])?.uri.fsPath;
+      return (baseOnly ? path.basename(targetFolder ?? "") : targetFolder) ?? "";
+    }
+  );
+  return result;
+}
+
+/**
+ * Promisified `exec` function, but with `cwd` bound to a workspace directory.
+ * @param command The command to run.
+ * @param opts Any other options to pass to `cp.exec`.
+ * @param workspaceFolder The name of the workspace folder to bind the `cwd`
+ * setting to. If not provided, will use the first folder in the workspace.
+ * @returns Promise that resolves with the output of running the command.
+ */
+export function promiseExec(
+  command: string,
+  opts?: cp.ExecOptions,
+  workspaceFolder?: string
+): Promise<{stdout: string; stderr: string}> {
+  const folderName = workspaceFolder ? `:${workspaceFolder}` : "";
+  const workspaceDirectory = // undefined if replaceWorkspaceVariables yields ""
+    replaceWorkspaceVariables(`\${workspaceFolder${folderName}}`) || undefined;
+  return util.promisify(cp.exec)(command, {cwd: workspaceDirectory, ...opts});
+}
+
+/** Returns the set Python path from settings without replacing variables. */
+export function getPythonPathSetting(): string | undefined {
+  return vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+}
 
 /**
  * Get the path to the most locally set Python. If Python cannot be found, this
  * will reject. Otherwise, will resolve with the python command.
+ * @param setPath The set Python path. Defaults to user setting. This allows for
+ * testing.
  * @returns A command which can be called to invoke Python in the terminal.
  */
-export async function getPython(): Promise<string> {
-  const setPath = vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+export async function getPython(
+  setPath: string | undefined = getPythonPathSetting()
+): Promise<string> {
   if (setPath !== undefined) {
+    const cookedPath = replaceWorkspaceVariables(setPath);
     try {
-      await promiseExec(`"${setPath}" --version`);
-      return setPath;
+      await promiseExec(`"${cookedPath}" --version`);
+      return `"${cookedPath}"`;
     } catch (err) {
       vscode.window.showErrorMessage(c`
         The Python path set in the "python.pythonPath" setting is invalid. Check
@@ -26,6 +76,7 @@ export async function getPython(): Promise<string> {
       throw err;
     }
   }
+
   try {
     await promiseExec("python --version");
     return "python";
@@ -49,10 +100,15 @@ export async function getPython(): Promise<string> {
  *
  * Reads the current settings and implements them or falls back to defaults.
  * @param path Path to the file to be formatted.
+ * @param pythonPromise Promise that resolves to the path to call Python with.
+ * Allows for unit testing.
  * @returns Runnable terminal command that will format the specified file.
  */
-export async function buildFormatCommand(path: string): Promise<string> {
-  const python = await getPython();
+export async function buildFormatCommand(
+  path: string,
+  pythonPromise: Promise<string> = getPython()
+): Promise<string> {
+  const python = await pythonPromise;
   const settings = vscode.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
   const wsl = settings.get<number>("wrapSummariesLength") || 79;
@@ -101,9 +157,7 @@ export async function installDocformatter(): Promise<void> {
 export async function alertFormattingError(
   err: FormatException
 ): Promise<void> {
-  if (
-    err.message.includes("No module named docformatter")
-  ) {
+  if (err.message.includes("No module named docformatter")) {
     const installButton = "Install Module";
     const response = await vscode.window.showErrorMessage(
       c`The Python module 'docformatter' must be installed to format

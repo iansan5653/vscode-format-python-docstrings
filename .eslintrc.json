@@ -46,6 +46,7 @@
     "@typescript-eslint/prefer-for-of": "error",
     "@typescript-eslint/no-parameter-properties": "off",
     "@typescript-eslint/no-explicit-any": "error",
+    "operator-linebreak": "off",
     "max-len": [
       "error",
       {

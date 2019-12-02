@@ -5,12 +5,13 @@ async function main(): Promise<void> {
   try {
     const extensionDevelopmentPath = path.resolve(__dirname, "../../");
     const extensionTestsPath = path.resolve(__dirname, "./index");
+    const workspacePath = path.resolve(extensionDevelopmentPath, "src/test/testspace.code-workspace");
 
     await runTests({
       version: "insiders",
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ["--disable-extensions"]
+      launchArgs: [workspacePath, "--disable-extensions"]
     });
   } catch (err) {
     process.exit(-1);

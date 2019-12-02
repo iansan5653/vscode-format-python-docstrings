@@ -2,15 +2,28 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import * as ext from "../extension";
 import {Hunk} from "diff";
+import * as path from "path";
 
-const testPythonFiles: Readonly<Record<string, string>> = {
+/** Relative path to the source test folder. */
+const testFolder = ["..", "..", "src", "test"];
+const examplePaths: Readonly<Record<string, string[]>> = {
   /** The basic test file with no quirks. */
-  base: "/../../src/test/example.py",
+  basicPythonFile: [...testFolder, "example.py"],
   /** A test file where the path contains spaces. */
-  spacesInName: "/../../src/test/example with spaces in name.py"
+  pythonFileWithSpaces: [...testFolder, "example with spaces in name.py"],
+  /** Sample workspace folder A. */
+  workspaceFolderA: [...testFolder, "test-folders", "test-folder-a"],
+  /** Sample workspace folder B. */
+  workspaceFolderB: [...testFolder, "test-folders", "test-folder-b"]
 };
 /** Extension identifier. */
 const identifier = "iansan5653.format-python-docstrings";
+/** The name of the workspace folder containing the root test directory. */
+const workspaceFolders = {
+  test: "test",
+  A: "FolderA",
+  B: "FolderB"
+};
 
 describe("extension.ts", function(): void {
   context("prior to extension activation", function(): void {
@@ -46,9 +59,11 @@ describe("extension.ts", function(): void {
     before("open test files", async function(): Promise<void> {
       // Open a text doc, then wait for the the extension to be active.
       const documentsList = await Promise.all([
-        vscode.workspace.openTextDocument(__dirname + testPythonFiles.base),
         vscode.workspace.openTextDocument(
-          __dirname + testPythonFiles.spacesInName
+          path.resolve(__dirname, ...examplePaths.basicPythonFile)
+        ),
+        vscode.workspace.openTextDocument(
+          path.resolve(__dirname, ...examplePaths.pythonFileWithSpaces)
         )
       ]);
       documents.base = documentsList[0];
@@ -237,7 +252,9 @@ describe("extension.ts", function(): void {
       });
 
       context("with modified settings in test folder", function(): void {
-        const settings = vscode.workspace.getConfiguration("docstringFormatter");
+        const settings = vscode.workspace.getConfiguration(
+          "docstringFormatter"
+        );
 
         before("change the relevant settings", async function(): Promise<void> {
           await Promise.all([
@@ -267,6 +284,146 @@ describe("extension.ts", function(): void {
             settings.update("forceWrap", undefined, true)
           ]);
         });
+      });
+
+      context("with custom pythonPath", function(): void {
+        it("should await custom pythonPath and use it", async function(): Promise<
+          void
+        > {
+          const examplePython = "Example Python Path";
+          const exampleFile = "Example File Path";
+          const command = await ext.buildFormatCommand(
+            exampleFile,
+            new Promise((res) => res(examplePython))
+          );
+          assert.strictEqual(
+            command,
+            // This function quotes the file path, but expects the python path
+            // to be quoted already.
+            // eslint-disable-next-line max-len
+            `${examplePython} -m docformatter "${exampleFile}" --wrap-summaries 79 --wrap-descriptions 72`
+          );
+        });
+      });
+    });
+
+    describe("#getPython()", function(): void {
+      it("should return a runnable Python path", async function(): Promise<
+        void
+      > {
+        const python = await ext.getPython();
+        assert.doesNotReject(ext.promiseExec(`${python} --version`));
+      });
+
+      it("should return 'python' or 'py' if no Python extension", async function(): Promise<
+        void
+      > {
+        // Only works if we do not install the python extention in the test env
+        const python = await ext.getPython();
+        assert(["python", "py"].includes(python));
+      });
+
+      it("should return 'python' or 'py' if setPath undefined", async function(): Promise<
+        void
+      > {
+        const python = await ext.getPython(undefined);
+        assert(["python", "py"].includes(python));
+      });
+
+      context("with local Python environments", function() {
+        const envName = "exampleEnv";
+        // On Linux devices, the Python executable in a virtual environment is
+        // located in the `bin` folder. On Windows, it's `scripts/python.exe`.
+        // process.platform is always "win32" on windows, even on win64.
+        // FIXME: Add Mac case and remove skips.
+        const subfolder = process.platform === "win32" ? "scripts" : "bin";
+
+        before("create a local environment", async function(): Promise<void> {
+          if (process.platform === "darwin") return this.skip();
+          this.timeout("30s");
+          this.slow("10s");
+          const python = await ext.getPython();
+          await ext.promiseExec(
+            `${python} -m venv ${envName}`,
+            undefined,
+            workspaceFolders.test
+          );
+        });
+
+        it("should run Python from the local environment when desired", async function(): Promise<
+          void
+        > {
+          if (process.platform === "darwin") return this.skip();
+          const python = await ext.getPython(
+            path.resolve(__dirname, ...testFolder, envName, subfolder, "python")
+          );
+          assert.doesNotReject(ext.promiseExec(`${python} --version`));
+        });
+
+        it("handles workspaceFolder variable", async function(): Promise<void> {
+          if (process.platform === "darwin") return this.skip();
+          const setPath = path.join(
+            `\${workspaceFolder:${workspaceFolders.test}}`,
+            envName,
+            subfolder,
+            "python"
+          );
+          const python = await ext.getPython(setPath);
+          assert.doesNotReject(ext.promiseExec(`${python} --version`));
+        });
+
+        after("delete local environment", async function(): Promise<void> {
+          // TODO: Uncomment when recursive option is not experimental
+          // await rmdir(`./${envName}`, {recursive: true});
+        });
+      });
+    });
+
+    context("#replaceWorkspaceVariables", function(): void {
+      it("handles {workspaceFolder} variable", async function(): Promise<void> {
+        assert.strictEqual(
+          ext.replaceWorkspaceVariables("text/${workspaceFolder}/text"),
+          `text/${path.resolve(
+            __dirname,
+            ...examplePaths.workspaceFolderA
+          )}/text`
+        );
+      });
+
+      it("handles {workspaceFolderBasename} variable", async function(): Promise<
+        void
+      > {
+        const path = examplePaths.workspaceFolderA;
+        assert.strictEqual(
+          ext.replaceWorkspaceVariables("text/${workspaceFolderBasename}/text"),
+          `text/${path[path.length - 1]}/text`
+        );
+      });
+
+      it("handles {workspaceFolder:name} variable", async function(): Promise<
+        void
+      > {
+        assert.strictEqual(
+          ext.replaceWorkspaceVariables(
+            `text/\${workspaceFolder:${workspaceFolders.B}}/text`
+          ),
+          `text/${path.resolve(
+            __dirname,
+            ...examplePaths.workspaceFolderB
+          )}/text`
+        );
+      });
+
+      it("handles {workspaceFolderBasename:name} variable", async function(): Promise<
+        void
+      > {
+        const path = examplePaths.workspaceFolderB;
+        assert.strictEqual(
+          ext.replaceWorkspaceVariables(
+            `text/\${workspaceFolderBasename:${workspaceFolders.B}}/text`
+          ),
+          `text/${path[path.length - 1]}/text`
+        );
       });
     });
 

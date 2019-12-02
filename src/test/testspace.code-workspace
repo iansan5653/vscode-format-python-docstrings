@@ -1,7 +1,16 @@
 {
   "folders": [
     {
-      "path": "."
+      "path": "./test-folders/test-folder-a",
+      "name": "FolderA"
+    },
+    {
+      "path": "./test-folders/test-folder-b",
+      "name": "FolderB"
+    },
+    {
+      "path": ".",
+      "name": "test"
     }
   ],
   "settings": {}
