@@ -1,4 +1,20 @@
 jobs:
+  - job: Lint
+    displayName: "Lint (ESLint)"
+    pool:
+      name: Hosted VS2017
+      demands: npm
+    steps:
+      - task: Npm@1
+        displayName: "Install dependencies"
+        inputs:
+          verbose: false
+      - task: Npm@1
+        displayName: "Lint"
+        inputs:
+          command: custom
+          verbose: false
+          customCommand: "run lint"
   - job: Windows_Stable
     displayName: "Windows - Stable"
     pool:
@@ -18,13 +34,6 @@ jobs:
         displayName: "Install dependencies"
         inputs:
           verbose: false
-      - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
       - task: Npm@1
         displayName: "Compile sources"
         inputs:
@@ -63,13 +72,6 @@ jobs:
         inputs:
           verbose: false
       - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
-      - task: Npm@1
         displayName: "Compile sources"
         inputs:
           command: custom
@@ -106,13 +108,6 @@ jobs:
         displayName: "Install dependencies"
         inputs:
           verbose: false
-      - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
       - task: Npm@1
         displayName: "Compile sources"
         inputs:
@@ -158,13 +153,6 @@ jobs:
         inputs:
           verbose: false
       - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
-      - task: Npm@1
         displayName: "Compile sources"
         inputs:
           command: custom
@@ -202,13 +190,6 @@ jobs:
         inputs:
           verbose: false
       - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
-      - task: Npm@1
         displayName: "Compile sources"
         inputs:
           command: custom
@@ -245,13 +226,6 @@ jobs:
         displayName: "Install dependencies"
         inputs:
           verbose: false
-      - task: Npm@1
-        displayName: "Lint"
-        continueOnError: true
-        inputs:
-          command: custom
-          verbose: false
-          customCommand: "run lint"
       - task: Npm@1
         displayName: "Compile sources"
         inputs:
