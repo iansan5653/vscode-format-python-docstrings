@@ -5,6 +5,15 @@ documented in this file.
 
 <!-- ## X.X.X [Unreleased] -->
 
+## 1.2.1
+
+### Fixed
+
+- Support workspace variables in `python.pythonPath` setting (#36)
+- Support local paths in `python.pythonPath` setting (#36)
+- Check to ensure that the Python version being used is `3.x.x` (#40)
+- Check for `python3` command as a possible Python command (#40)
+
 ## 1.2.0
 
 ### Added

@@ -3,7 +3,7 @@
   "displayName": "Python Docstring Formatter",
   "publisher": "iansan5653",
   "description": "Format docstrings in Python using PEP 257 standards.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "icon.png",
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": {
