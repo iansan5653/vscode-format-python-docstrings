@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import * as ext from "../extension";
-import {Hunk} from "diff";
+import {Hunk, convertChangesToXML} from "diff";
 import * as path from "path";
 
 /** Relative path to the source test folder. */
@@ -362,14 +362,13 @@ describe("extension.ts", function(): void {
 
         it("handles workspaceFolder variable", async function(): Promise<void> {
           if (process.platform === "darwin") return this.skip();
-          const python = await ext.getPython(
-            path.resolve(
-              `\${workspaceFolder:${workspaceFolders.test}}`,
-              envName,
-              subfolder,
-              "python"
-            )
+          const setPath = path.join(
+            `\${workspaceFolder:${workspaceFolders.test}}`,
+            envName,
+            subfolder,
+            "python"
           );
+          const python = await ext.getPython(setPath);
           assert.doesNotReject(ext.promiseExec(`${python} --version`));
         });
 
