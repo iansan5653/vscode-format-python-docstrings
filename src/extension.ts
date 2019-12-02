@@ -22,8 +22,11 @@ export function replaceWorkspaceVariables(text: string): string {
     (_, baseOnly?: string, dirName?: string): string => {
       const targetFolder = (dirName
         ? workspaceFolders?.find((folder): boolean => folder.name === dirName)
-        : workspaceFolders?.[0])?.uri.fsPath;
-      return (baseOnly ? path.basename(targetFolder ?? "") : targetFolder) ?? "";
+        : workspaceFolders?.[0]
+      )?.uri.fsPath;
+      return (
+        (baseOnly ? path.basename(targetFolder ?? "") : targetFolder) ?? ""
+      );
     }
   );
   return result;
@@ -54,6 +57,19 @@ export function getPythonPathSetting(): string | undefined {
 }
 
 /**
+ * Returns `true` if the command points to a valid executable for Python 3.
+ * @param command The command to try, ie `python`.
+ */
+export async function checkPointsToPython3(command: string): Promise<boolean> {
+  try {
+    const result = await promiseExec(`${command} --version`);
+    return !result.stderr && result.stdout.includes("Python 3");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Get the path to the most locally set Python. If Python cannot be found, this
  * will reject. Otherwise, will resolve with the python command.
  * @param setPath The set Python path. Defaults to user setting. This allows for
@@ -63,36 +79,30 @@ export function getPythonPathSetting(): string | undefined {
 export async function getPython(
   setPath: string | undefined = getPythonPathSetting()
 ): Promise<string> {
+  let errorMessage: string;
+
   if (setPath !== undefined) {
-    const cookedPath = replaceWorkspaceVariables(setPath);
-    try {
-      await promiseExec(`"${cookedPath}" --version`);
-      return `"${cookedPath}"`;
-    } catch (err) {
-      vscode.window.showErrorMessage(c`
-        The Python path set in the "python.pythonPath" setting is invalid. Check
-        the value or clear the setting to use the global Python installation.
-      `);
-      throw err;
+    const cookedPath = `"${replaceWorkspaceVariables(setPath)}"`;
+    if (await checkPointsToPython3(cookedPath)) return cookedPath;
+    errorMessage = c`
+      The Python path set in the "python.pythonPath" setting is invalid or
+      points to Python 2. Check the value or clear the setting to use the
+      global Python installation. The extension is not compatible with Python
+      2.
+    `;
+  } else {
+    for (const command of ["python", "python3", "py"]) {
+      if (await checkPointsToPython3(command)) return command;
     }
+    errorMessage = c`
+      Python 3 is either not installed or not properly configured. Check
+      that the Python location is set in VSCode or provided in the system
+      environment variables.
+    `;
   }
 
-  try {
-    await promiseExec("python --version");
-    return "python";
-  } catch {
-    try {
-      await promiseExec("py --version");
-      return "py";
-    } catch (err) {
-      vscode.window.showErrorMessage(c`
-        Python is either not installed or not properly configured. Check that
-        the Python location is set in VSCode or provided in the system
-        environment variables.
-      `);
-      throw err;
-    }
-  }
+  vscode.window.showErrorMessage(errorMessage);
+  throw new Error(errorMessage);
 }
 
 /**
