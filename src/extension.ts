@@ -1,11 +1,11 @@
-import * as vscode from "vscode";
+import * as vsc from "vscode";
 import * as util from "util";
 import * as cp from "child_process";
 import * as diff from "diff";
 import {c} from "compress-tag";
 import * as path from "path";
 
-export const registrations: vscode.Disposable[] = [];
+export const registrations: vsc.Disposable[] = [];
 
 /**
  * Replaces the standard VSCode variables `${workspaceFolder}` and
@@ -16,7 +16,7 @@ export const registrations: vscode.Disposable[] = [];
  * @returns The input string with the variables replaced.
  */
 export function replaceWorkspaceVariables(text: string): string {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const workspaceFolders = vsc.workspace.workspaceFolders;
   const result = text.replace(
     /\${workspaceFolder(Basename)?:?([^}]*)?}/g,
     (_, baseOnly?: string, dirName?: string): string => {
@@ -53,7 +53,7 @@ export function promiseExec(
 
 /** Returns the set Python path from settings without replacing variables. */
 export function getPythonPathSetting(): string | undefined {
-  return vscode.workspace.getConfiguration("python").get<string>("pythonPath");
+  return vsc.workspace.getConfiguration("python").get<string>("pythonPath");
 }
 
 /**
@@ -101,7 +101,7 @@ export async function getPython(
     `;
   }
 
-  vscode.window.showErrorMessage(errorMessage);
+  vsc.window.showErrorMessage(errorMessage);
   throw new Error(errorMessage);
 }
 
@@ -119,7 +119,7 @@ export async function buildFormatCommand(
   pythonPromise: Promise<string> = getPython()
 ): Promise<string> {
   const python = await pythonPromise;
-  const settings = vscode.workspace.getConfiguration("docstringFormatter");
+  const settings = vsc.workspace.getConfiguration("docstringFormatter");
   // Abbreviated to keep template string short
   const wsl = settings.get<number>("wrapSummariesLength") || 79;
   const wdl = settings.get<number>("wrapDescriptionsLength") || 72;
@@ -146,7 +146,7 @@ export async function installDocformatter(): Promise<void> {
   try {
     await promiseExec(`${python} -m pip install --upgrade docformatter`);
   } catch (err) {
-    vscode.window.showErrorMessage(c`
+    vsc.window.showErrorMessage(c`
       Could not install docformatter automatically. Make sure that pip
       is installed correctly and try manually installing with 'pip
       install --upgrade docformatter. \n\n Full error: ${err}'.
@@ -169,7 +169,7 @@ export async function alertFormattingError(
 ): Promise<void> {
   if (err.message.includes("No module named docformatter")) {
     const installButton = "Install Module";
-    const response = await vscode.window.showErrorMessage(
+    const response = await vsc.window.showErrorMessage(
       c`The Python module 'docformatter' must be installed to format
           docstrings.`,
       installButton
@@ -179,15 +179,15 @@ export async function alertFormattingError(
     }
   } else {
     const bugReportButton = "Submit Bug Report";
-    const response = await vscode.window.showErrorMessage(
+    const response = await vsc.window.showErrorMessage(
       c`Unknown Error: Could not format docstrings. Full error:\n\n
         ${err.message}`,
       bugReportButton
     );
     if (response === bugReportButton) {
-      vscode.commands.executeCommand(
+      vsc.commands.executeCommand(
         "vscode.open",
-        vscode.Uri.parse(
+        vsc.Uri.parse(
           "https://github.com/iansan5653/vscode-format-python-docstrings/issues/new"
         )
       );
@@ -206,7 +206,7 @@ export async function alertFormattingError(
  * automatically show an error message to the user.
  */
 export async function formatFile(
-  path: string | undefined = vscode.window.activeTextEditor?.document.fileName
+  path: string | undefined = vsc.window.activeTextEditor?.document.fileName
 ): Promise<diff.Hunk[]> {
   if (!path) {
     throw new Error(
@@ -230,14 +230,14 @@ export async function formatFile(
  * @param hunks Array of hunks to convert to edits.
  * @returns Array of VSCode text edits, which map directly to the input hunks.
  */
-export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
+export function hunksToEdits(hunks: diff.Hunk[]): vsc.TextEdit[] {
   return hunks.map((hunk) => {
-    const startPos = new vscode.Position(hunk.newStart - 1, 0);
-    const endPos = new vscode.Position(
+    const startPos = new vsc.Position(hunk.newStart - 1, 0);
+    const endPos = new vsc.Position(
       hunk.newStart - 1 + hunk.oldLines - 1,
       hunk.lines[hunk.lines.length - 1].length - 1
     );
-    const editRange = new vscode.Range(startPos, endPos);
+    const editRange = new vsc.Range(startPos, endPos);
 
     const newTextLines = hunk.lines
       .filter(
@@ -247,7 +247,7 @@ export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
     const lineEndChar: string = hunk.linedelimiters[0];
     const newText = newTextLines.join(lineEndChar);
 
-    return new vscode.TextEdit(editRange, newText);
+    return new vsc.TextEdit(editRange, newText);
   });
 }
 
@@ -259,10 +259,10 @@ export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
  * applied successfully.
  */
 export async function applyEditsToCurrentEditor(
-  edits: vscode.TextEdit[]
+  edits: vsc.TextEdit[]
 ): Promise<boolean> {
   return (
-    vscode.window.activeTextEditor?.edit((editBuilder): void => {
+    vsc.window.activeTextEditor?.edit((editBuilder): void => {
       edits.forEach((edit) => editBuilder.replace(edit.range, edit.newText));
     }) ?? false
   );
@@ -275,17 +275,17 @@ export async function applyEditsToCurrentEditor(
 export function activate(): void {
   const command = "docstringFormatter.formatDocstrings";
 
-  const selector: vscode.DocumentSelector = {
+  const selector: vsc.DocumentSelector = {
     scheme: "file",
     language: "python"
   };
 
-  const formatProvider: vscode.DocumentFormattingEditProvider = {
+  const formatProvider: vsc.DocumentFormattingEditProvider = {
     provideDocumentFormattingEdits: (document) =>
       formatFile(document.fileName).then(hunksToEdits)
   };
 
-  const actionProvider: vscode.CodeActionProvider = {
+  const actionProvider: vsc.CodeActionProvider = {
     provideCodeActions: (document) => [
       {
         title: "Format Docstrings",
@@ -296,21 +296,21 @@ export function activate(): void {
     ]
   };
 
-  const actionMetadata: vscode.CodeActionProviderMetadata = {
-    providedCodeActionKinds: [vscode.CodeActionKind.Source]
+  const actionMetadata: vsc.CodeActionProviderMetadata = {
+    providedCodeActionKinds: [vsc.CodeActionKind.Source]
   };
 
   registrations.push(
-    vscode.languages.registerDocumentFormattingEditProvider(
+    vsc.languages.registerDocumentFormattingEditProvider(
       selector,
       formatProvider
     ),
-    vscode.languages.registerCodeActionsProvider(
+    vsc.languages.registerCodeActionsProvider(
       selector,
       actionProvider,
       actionMetadata
     ),
-    vscode.commands.registerCommand(command, (filePath?: string) =>
+    vsc.commands.registerCommand(command, (filePath?: string) =>
       formatFile(filePath)
         .then(hunksToEdits)
         .then(applyEditsToCurrentEditor)
