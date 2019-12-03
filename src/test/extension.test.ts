@@ -311,7 +311,7 @@ describe("extension.ts", function(): void {
       it("should return false and not error on invalid command", async function(): Promise<
         void
       > {
-        const python = await ext.checkPointsToPython3("notPythonCommand");
+        const python = await ext.pointsToPython3("notPythonCommand");
         assert(!python);
       });
 
@@ -321,7 +321,7 @@ describe("extension.ts", function(): void {
         const possibleCommands = ["python", "py", "python3"];
         let success = false;
         for (const command of possibleCommands) {
-          success = await ext.checkPointsToPython3(command);
+          success = await ext.pointsToPython3(command);
           if (success) break;
         }
         assert(success);

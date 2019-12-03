@@ -120,6 +120,14 @@
           "description": "Force descriptions to be wrapped even if it may result in a mess."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "docstringFormatter.formatDocstrings",
+        "title": "Format Docstrings",
+        "when": "editorLangId == python",
+        "enablement": "textInputFocus && !editorReadonly"
+      }
+    ]
   }
 }

@@ -5,7 +5,7 @@ import * as diff from "diff";
 import {c} from "compress-tag";
 import * as path from "path";
 
-export let registration: vscode.Disposable | undefined;
+export const registrations: vscode.Disposable[] = [];
 
 /**
  * Replaces the standard VSCode variables `${workspaceFolder}` and
@@ -60,7 +60,7 @@ export function getPythonPathSetting(): string | undefined {
  * Returns `true` if the command points to a valid executable for Python 3.
  * @param command The command to try, ie `python`.
  */
-export async function checkPointsToPython3(command: string): Promise<boolean> {
+export async function pointsToPython3(command: string): Promise<boolean> {
   try {
     const result = await promiseExec(`${command} --version`);
     return !result.stderr && result.stdout.includes("Python 3");
@@ -83,7 +83,7 @@ export async function getPython(
 
   if (setPath !== undefined) {
     const cookedPath = `"${replaceWorkspaceVariables(setPath)}"`;
-    if (await checkPointsToPython3(cookedPath)) return cookedPath;
+    if (await pointsToPython3(cookedPath)) return cookedPath;
     errorMessage = c`
       The Python path set in the "python.pythonPath" setting is invalid or
       points to Python 2. Check the value or clear the setting to use the
@@ -92,7 +92,7 @@ export async function getPython(
     `;
   } else {
     for (const command of ["python", "python3", "py"]) {
-      if (await checkPointsToPython3(command)) return command;
+      if (await pointsToPython3(command)) return command;
     }
     errorMessage = c`
       Python 3 is either not installed or not properly configured. Check
@@ -198,16 +198,26 @@ export async function alertFormattingError(
 /**
  * Format a file using Docformatter and return the edit hunks without
  * modifying the file.
- * @param path Full path to a file to format.
+ * @param path Full path to a file to format. Defaults to the currently open
+ * file, if there is one. If not given and no currently open file is present,
+ * will raise an error.
  * @returns A promise that resolves to the edit hunks, which can then be
  * converted to edits and applied to the file. If the promise rejects, will
  * automatically show an error message to the user.
  */
-export async function formatFile(path: string): Promise<diff.Hunk[]> {
-  const command: string = await buildFormatCommand(path);
+export async function formatFile(
+  path: string | undefined = vscode.window.activeTextEditor?.document.fileName
+): Promise<diff.Hunk[]> {
+  if (!path) {
+    throw new Error(
+      "Could not format docstrings because no file path was given."
+    );
+  }
+
   try {
+    const command = await buildFormatCommand(path);
     const result = await promiseExec(command);
-    const parsed: diff.ParsedDiff[] = diff.parsePatch(result.stdout);
+    const parsed = diff.parsePatch(result.stdout);
     return parsed[0].hunks;
   } catch (err) {
     alertFormattingError(err);
@@ -221,25 +231,40 @@ export async function formatFile(path: string): Promise<diff.Hunk[]> {
  * @returns Array of VSCode text edits, which map directly to the input hunks.
  */
 export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
-  return hunks.map(
-    (hunk): vscode.TextEdit => {
-      const startPos = new vscode.Position(hunk.newStart - 1, 0);
-      const endPos = new vscode.Position(
-        hunk.newStart - 1 + hunk.oldLines - 1,
-        hunk.lines[hunk.lines.length - 1].length - 1
-      );
-      const editRange = new vscode.Range(startPos, endPos);
+  return hunks.map((hunk) => {
+    const startPos = new vscode.Position(hunk.newStart - 1, 0);
+    const endPos = new vscode.Position(
+      hunk.newStart - 1 + hunk.oldLines - 1,
+      hunk.lines[hunk.lines.length - 1].length - 1
+    );
+    const editRange = new vscode.Range(startPos, endPos);
 
-      const newTextLines = hunk.lines
-        .filter(
-          (line): boolean => line.charAt(0) === " " || line.charAt(0) === "+"
-        )
-        .map((line): string => line.substr(1));
-      const lineEndChar: string = hunk.linedelimiters[0];
-      const newText = newTextLines.join(lineEndChar);
+    const newTextLines = hunk.lines
+      .filter(
+        (line): boolean => line.charAt(0) === " " || line.charAt(0) === "+"
+      )
+      .map((line): string => line.substr(1));
+    const lineEndChar: string = hunk.linedelimiters[0];
+    const newText = newTextLines.join(lineEndChar);
 
-      return new vscode.TextEdit(editRange, newText);
-    }
+    return new vscode.TextEdit(editRange, newText);
+  });
+}
+
+/**
+ * Apply a set of edits to the active text editor. There should be an active
+ * text editor and it should not be readonly.
+ * @param edits The edits to apply.
+ * @returns Promise resolving to a boolean indicating `true` if the edits
+ * applied successfully.
+ */
+export async function applyEditsToCurrentEditor(
+  edits: vscode.TextEdit[]
+): Promise<boolean> {
+  return (
+    vscode.window.activeTextEditor?.edit((editBuilder): void => {
+      edits.forEach((edit) => editBuilder.replace(edit.range, edit.newText));
+    }) ?? false
   );
 }
 
@@ -248,33 +273,65 @@ export function hunksToEdits(hunks: diff.Hunk[]): vscode.TextEdit[] {
  * the `activationEvents` property in package.json.
  */
 export function activate(): void {
-  // Register formatter
+  const command = "docstringFormatter.formatDocstrings";
+
   const selector: vscode.DocumentSelector = {
     scheme: "file",
     language: "python"
   };
 
-  const provider: vscode.DocumentFormattingEditProvider = {
-    provideDocumentFormattingEdits: (
-      document: vscode.TextDocument
-    ): Promise<vscode.TextEdit[]> => {
-      return formatFile(document.fileName).then(hunksToEdits);
-    }
+  const formatProvider: vscode.DocumentFormattingEditProvider = {
+    provideDocumentFormattingEdits: (document) =>
+      formatFile(document.fileName).then(hunksToEdits)
   };
 
-  registration = vscode.languages.registerDocumentFormattingEditProvider(
-    selector,
-    provider
+  const actionProvider: vscode.CodeActionProvider = {
+    provideCodeActions: (document) => [
+      {
+        title: "Format Docstrings",
+        command,
+        tooltip: "Format all docstrings in the current document.",
+        arguments: [document.fileName]
+      }
+    ]
+  };
+
+  const actionMetadata: vscode.CodeActionProviderMetadata = {
+    providedCodeActionKinds: [vscode.CodeActionKind.Source]
+  };
+
+  registrations.push(
+    vscode.languages.registerDocumentFormattingEditProvider(
+      selector,
+      formatProvider
+    ),
+    vscode.languages.registerCodeActionsProvider(
+      selector,
+      actionProvider,
+      actionMetadata
+    ),
+    vscode.commands.registerCommand(command, (filePath?: string) =>
+      formatFile(filePath)
+        .then(hunksToEdits)
+        .then(applyEditsToCurrentEditor)
+    )
   );
+}
+
+/**
+ * Unregister all registrations stored in the global `registrations` array.
+ */
+export function unregisterAll(): void {
+  while (registrations.length) {
+    registrations.pop()?.dispose();
+  }
 }
 
 /**
  * Deactivate the extension. Runs automatically upon deactivation or uninstall.
  */
 export function deactivate(): void {
-  if (registration) {
-    registration.dispose();
-  }
+  unregisterAll();
 }
 
 /**
