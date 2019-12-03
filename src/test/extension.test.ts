@@ -41,8 +41,8 @@ describe("extension.ts", function(): void {
     });
 
     describe("#registration", function(): void {
-      it("should be undefined until activated", function(): void {
-        assert.strictEqual(ext.registration, undefined);
+      it("should be empty until activated", function(): void {
+        assert.strictEqual(ext.registrations, []);
       });
     });
   });
@@ -88,7 +88,7 @@ describe("extension.ts", function(): void {
 
     describe("#registration", function(): void {
       it("should contain the formatter disposable upon activation", function(): void {
-        assert.ok(ext.registration);
+        assert(ext.registrations.length);
       });
     });
 

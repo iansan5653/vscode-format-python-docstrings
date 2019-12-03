@@ -340,11 +340,3 @@ export function deactivate(): void {
 export interface FormatException {
   message: string;
 }
-
-/**
- * Sleep for the provided time and then resolve the empty promise.
- * @param duration Number of milliseconds to sleep.
- */
-export function sleep(duration: number): Promise<void> {
-  return new Promise((res): NodeJS.Timeout => setTimeout(res, duration));
-}
