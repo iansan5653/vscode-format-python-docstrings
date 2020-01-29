@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/diff": "^4.0.2",
     "@types/glob": "^7.1.1",
-    "@types/mocha": "^5.2.7",
+    "@types/mocha": "^7.0.0",
     "@types/node": "^13.1.0",
     "@types/vscode": "1.41.0",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
