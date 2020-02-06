@@ -43,7 +43,7 @@
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.0",
-    "@types/vscode": "1.41.0",
+    "@types/vscode": "1.42.0",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.10.0",
     "eslint": "^6.6.0",
