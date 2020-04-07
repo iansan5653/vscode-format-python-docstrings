@@ -60,7 +60,7 @@
     "child_process": "^1.0.2",
     "compress-tag": "^1.2.2",
     "diff": "^4.0.1",
-    "util": "^0.12.1"
+    "util": "^0.12.2"
   },
   "keywords": [
     "python",
